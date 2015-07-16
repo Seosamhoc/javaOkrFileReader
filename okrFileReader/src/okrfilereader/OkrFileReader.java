@@ -92,7 +92,6 @@ public class OkrFileReader {
                         case "45": 
                             changeAmount = line.substring(24,35).trim();
                             if(!(changeAmount.equals("0.00"))){
-//                                transactions.get(transNum-1).tenders.is_change = "true";
                                 transactions.get(transNum-1).tendersList.get(transactions.get(transNum-1).tendersList.size()-1).is_change = "true";
                             }
                             break;
