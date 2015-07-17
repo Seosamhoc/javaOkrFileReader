@@ -74,13 +74,13 @@ public class OkrFileReader {
                             transactions.get(transNum-1).order_number = Double.parseDouble(line.substring(14,18).trim());
                             break;
                         case "20":
-                            if(line.charAt(46) == ',')
-                            {
-                                productNum = Integer.parseInt(line.substring(44,46));
-                            }
-                            else if(line.charAt(45) == ',')
+                            if(line.charAt(45) == ',')
                             {
                                 productNum = Integer.parseInt(line.substring(44,45));
+                            }
+                            else if(line.charAt(46) == ',')
+                            {
+                                productNum = Integer.parseInt(line.substring(44,46));
                             }
                             else
                             {
