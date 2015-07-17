@@ -17,7 +17,7 @@ public class OkrFileReader {
     }
     public OkrFileReader(){
         
-        String fileLocation = "/Users/seosamh/Desktop/JSON project/audit000.txt";
+        String fileLocation = "C:\\Users\\blue16\\My Documents\\audit000.txt";
         long startTime = System.currentTimeMillis();
         File f = new File(fileLocation); 
         if (f.exists()) {
@@ -36,6 +36,7 @@ public class OkrFileReader {
             String orderTime;
             String destination;
             int cancelStatus;
+            int productNum;
             String tenderedAmount;
             String changeAmount;
             String orderSubtotal;
@@ -71,6 +72,21 @@ public class OkrFileReader {
                                     break;
                             }
                             transactions.get(transNum-1).order_number = Double.parseDouble(line.substring(14,18).trim());
+                            break;
+                        case "20":
+                            if(line.charAt(46) == ',')
+                            {
+                                productNum = Integer.parseInt(line.substring(44,46));
+                            }
+                            else if(line.charAt(45) == ',')
+                            {
+                                productNum = Integer.parseInt(line.substring(44,45));
+                            }
+                            else
+                            {
+                                productNum = Integer.parseInt(line.substring(44,47));
+                            }
+                            transactions.get(transNum-1).newProduct(productNum);
                             break;
                         case "40":
                             cancelStatus = Integer.parseInt(line.substring(43,44));
@@ -127,22 +143,22 @@ public class OkrFileReader {
                     }
                 }
             }
-            System.out.println("{");
-            System.out.println("  \"api_version\": \"1.33\",");
-            System.out.println("  \"password\": \"password here\",");
-            System.out.println("  \"method\": \"addTlogs\",");
-            System.out.println("  \"provider\": \"okr\",");
-            System.out.println("  \"params\": {");
-            System.out.println("    \"restaurant_id\": \"7243\",");
-            System.out.println("    \"tlogs\": [");
-            for(int i=0;i<transactions.size()-1; i++)
-            {
-                System.out.println(transactions.get(i).outputJSON(true));
-            }
-            System.out.println(transactions.get(transactions.size()-1).outputJSON(false));
-            System.out.println("    ]" );
-            System.out.println("  }" );
-            System.out.println("}");
+//            System.out.println("{");
+//            System.out.println("  \"api_version\": \"1.33\",");
+//            System.out.println("  \"password\": \"password here\",");
+//            System.out.println("  \"method\": \"addTlogs\",");
+//            System.out.println("  \"provider\": \"okr\",");
+//            System.out.println("  \"params\": {");
+//            System.out.println("    \"restaurant_id\": \"7243\",");
+//            System.out.println("    \"tlogs\": [");
+//            for(int i=0;i<transactions.size()-1; i++)
+//            {
+//                System.out.println(transactions.get(i).outputJSON(true));
+//            }
+//            System.out.println(transactions.get(transactions.size()-1).outputJSON(false));
+//            System.out.println("    ]" );
+//            System.out.println("  }" );
+//            System.out.println("}");
             in.close();
         } 
         catch (IOException e) {

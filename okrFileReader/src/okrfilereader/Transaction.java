@@ -22,6 +22,14 @@ public class Transaction {
     ArrayList<Tender> tendersList = new ArrayList();
     Tender tenders;
     
+    public void newProduct(int productNum)
+    {
+        products = new Product();
+        productsList.add(products);
+        productsList.get(productsList.size()-1).product_id = productNum;
+        System.out.println(productsList.get(productsList.size()-1).product_id);
+    }
+    
     public void newTender(int tenderType, int cancelStatus, String tenderedAmount)
     {
         tenders = new Tender();
