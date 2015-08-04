@@ -17,8 +17,8 @@ public class OkrFileReader {
     }
     public OkrFileReader(){
         
-        //String fileLocation = "C:\\Users\\blue16\\My Documents\\audit000.txt";
-        String fileLocation = "/Users/seosamh/Desktop/JSON project/audit000.txt";
+        String fileLocation = "C:\\Users\\blue16\\My Documents\\audit000.txt";
+        //String fileLocation = "/Users/seosamh/Desktop/JSON project/audit000.txt";
         long startTime = System.currentTimeMillis();
         File f = new File(fileLocation); 
         if (f.exists()) {
