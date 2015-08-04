@@ -16,20 +16,20 @@ public class Tender {
     
     public String outputJSON(Boolean comma){
         StringBuilder jsonStringBuilder = new StringBuilder();
-        jsonStringBuilder.append("          {\n");
-        jsonStringBuilder.append("            \"tender_id\": \"").append(tender_id).append("\",\n");
-        jsonStringBuilder.append("            \"third_party_id\": \"").append(third_party_id).append("\",\n");
-        jsonStringBuilder.append("            \"tender_name\": \"").append(tender_name).append("\",\n");
-        jsonStringBuilder.append("            \"count\": \"").append(count).append("\",\n");
-        jsonStringBuilder.append("            \"amount\": \"").append(amount).append("\",\n");
-        jsonStringBuilder.append("            \"is_change\": \"").append(is_change).append("\",\n");
-        jsonStringBuilder.append("            \"mode\": \"").append(mode).append("\"\n");
+        jsonStringBuilder.append("{");
+        jsonStringBuilder.append("\"tender_id\":\"").append(tender_id).append("\",");
+        jsonStringBuilder.append("\"third_party_id\":\"").append(third_party_id).append("\",");
+        jsonStringBuilder.append("\"tender_name\":\"").append(tender_name).append("\",");
+        jsonStringBuilder.append("\"count\":\"").append(count).append("\",");
+        jsonStringBuilder.append("\"amount\":\"").append(amount).append("\",");
+        jsonStringBuilder.append("\"is_change\":\"").append(is_change).append("\",");
+        jsonStringBuilder.append("\"mode\":\"").append(mode).append("\"");
         if(comma){
-            jsonStringBuilder.append("          },\n");
+            jsonStringBuilder.append("},");
         }
         else
         {
-            jsonStringBuilder.append("          }\n");
+            jsonStringBuilder.append("}");
         }
         String jsonString = jsonStringBuilder.toString();
         return jsonString;

@@ -27,7 +27,7 @@ public class Transaction {
         products = new Product();
         productsList.add(products);
         productsList.get(productsList.size()-1).product_id = productNum;
-        System.out.println(productsList.get(productsList.size()-1).product_id);
+        //System.out.print(productsList.get(productsList.size()-1).product_id);
     }
     
     public void newTender(int tenderType, int cancelStatus, String tenderedAmount)
@@ -71,23 +71,23 @@ public class Transaction {
     
     public String outputJSON(Boolean comma){
         StringBuilder jsonStringBuilder = new StringBuilder();
-        jsonStringBuilder.append("      {\n");
-        jsonStringBuilder.append("        \"sale_id\"" + ": \"").append(sale_id).append("\",\n");
-        jsonStringBuilder.append("        \"date\"" + ": \"").append(date).append("\",\n");
-        jsonStringBuilder.append("        \"transaction_start_datetime\": \"").append(transaction_start_datetime).append("\",\n");
-        jsonStringBuilder.append("        \"transaction_end_datetime\": \"").append(transaction_end_datetime).append("\",\n");
-        jsonStringBuilder.append("        \"destination\": \"").append(destination).append("\",\n");
-        jsonStringBuilder.append("        \"order_number\": \"").append(order_number).append("\",\n");
-        jsonStringBuilder.append("        \"order_sub_total\": \"").append(order_sub_total).append("\",\n"); 
-        jsonStringBuilder.append("        \"is_overring\": \"").append(is_overring).append("\",\n");
-        jsonStringBuilder.append("        \"deleted_items\": \"").append(deleted_items).append("\",\n");
-//        jsonStringBuilder.append("        \"products\": [\n");
+        jsonStringBuilder.append("{");
+        jsonStringBuilder.append("\"sale_id\"" + ":\"").append(sale_id).append("\",");
+        jsonStringBuilder.append("\"date\"" + ":\"").append(date).append("\",");
+        jsonStringBuilder.append("\"transaction_start_datetime\":\"").append(transaction_start_datetime).append("\",");
+        jsonStringBuilder.append("\"transaction_end_datetime\":\"").append(transaction_end_datetime).append("\",");
+        jsonStringBuilder.append("\"destination\":\"").append(destination).append("\",");
+        jsonStringBuilder.append("\"order_number\":\"").append(order_number).append("\",");
+        jsonStringBuilder.append("\"order_sub_total\":\"").append(order_sub_total).append("\","); 
+        jsonStringBuilder.append("\"is_overring\":\"").append(is_overring).append("\",");
+        jsonStringBuilder.append("\"deleted_items\":\"").append(deleted_items).append("\",");
+//        jsonStringBuilder.append("        \"products\": [");
         
-//        jsonStringBuilder.append("        ],\n");
-//        jsonStringBuilder.append("        \"valuemeals\": [\n");
+//        jsonStringBuilder.append("        ],");
+//        jsonStringBuilder.append("        \"valuemeals\": [");
         
-//        jsonStringBuilder.append("        ],\n");
-        jsonStringBuilder.append("        \"tenders\": [\n");
+//        jsonStringBuilder.append("        ],");
+        jsonStringBuilder.append("\"tenders\":[");
         for(int i=0; i<tendersList.size()-1; i++){
             jsonStringBuilder.append(tendersList.get(i).outputJSON(true));
         }
@@ -99,13 +99,13 @@ public class Transaction {
         else{
             jsonStringBuilder.append(tendersList.get(tendersList.size()-1).outputJSON(false));
         }
-        jsonStringBuilder.append("        ]\n");
+        jsonStringBuilder.append("]");
         if(comma){
-            jsonStringBuilder.append("      },");
+            jsonStringBuilder.append("},");
         }
         else
         {
-            jsonStringBuilder.append("      }");
+            jsonStringBuilder.append("}");
         }
         String jsonString = jsonStringBuilder.toString();
         return jsonString;

@@ -17,13 +17,14 @@ public class OkrFileReader {
     }
     public OkrFileReader(){
         
-        String fileLocation = "C:\\Users\\blue16\\My Documents\\audit000.txt";
+        //String fileLocation = "C:\\Users\\blue16\\My Documents\\audit000.txt";
+        String fileLocation = "/Users/seosamh/Desktop/JSON project/audit000.txt";
         long startTime = System.currentTimeMillis();
         File f = new File(fileLocation); 
         if (f.exists()) {
-            System.out.println("File exists");
+            //System.out.println("File exists");
         } else {
-            System.out.println("File does not exist");
+            System.out.print("File does not exist");
         }
         try {
             FileInputStream fStream = new FileInputStream(fileLocation);
@@ -143,30 +144,30 @@ public class OkrFileReader {
                     }
                 }
             }
-//            System.out.println("{");
-//            System.out.println("  \"api_version\": \"1.33\",");
-//            System.out.println("  \"password\": \"password here\",");
-//            System.out.println("  \"method\": \"addTlogs\",");
-//            System.out.println("  \"provider\": \"okr\",");
-//            System.out.println("  \"params\": {");
-//            System.out.println("    \"restaurant_id\": \"7243\",");
-//            System.out.println("    \"tlogs\": [");
-//            for(int i=0;i<transactions.size()-1; i++)
-//            {
-//                System.out.println(transactions.get(i).outputJSON(true));
-//            }
-//            System.out.println(transactions.get(transactions.size()-1).outputJSON(false));
-//            System.out.println("    ]" );
-//            System.out.println("  }" );
-//            System.out.println("}");
+            System.out.print("{");
+            System.out.print("\"api_version\":\"2.3\",");
+            System.out.print("\"password\":\"password here\",");
+            System.out.print("\"method\":\"addTlogs\",");
+            System.out.print("\"provider\":\"okr\",");
+            System.out.print("\"params\":{");
+            System.out.print("\"restaurant_id\":\"7651\",");
+            System.out.print("\"tlogs\":[");
+            for(int i=0;i<transactions.size()-1; i++)
+            {
+                System.out.print(transactions.get(i).outputJSON(true));
+            }
+            System.out.print(transactions.get(transactions.size()-1).outputJSON(false));
+            System.out.print("]" );
+            System.out.print("}" );
+            System.out.print("}\n");
             in.close();
         } 
         catch (IOException e) {
-            System.out.println("File input error");
+            System.out.print("File input error");
         }
-        System.out.println(System.getProperty("user.home"));
+        //System.out.print(System.getProperty("user.home"));
         long endTime = System.currentTimeMillis();
 
-        System.out.println("That took " + (endTime - startTime) + " milliseconds");
+        //System.out.print("That took " + (endTime - startTime) + " milliseconds");
     }
 }
