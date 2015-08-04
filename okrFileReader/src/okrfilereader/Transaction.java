@@ -81,9 +81,19 @@ public class Transaction {
         jsonStringBuilder.append("\"order_sub_total\":\"").append(order_sub_total).append("\","); 
         jsonStringBuilder.append("\"is_overring\":\"").append(is_overring).append("\",");
         jsonStringBuilder.append("\"deleted_items\":\"").append(deleted_items).append("\",");
-//        jsonStringBuilder.append("        \"products\": [");
-        
-//        jsonStringBuilder.append("        ],");
+        jsonStringBuilder.append("\"products\": [\n");
+        for(int i=0; i<productsList.size()-1; i++){
+            jsonStringBuilder.append(productsList.get(i).outputJSON(true));
+        }
+        if(productsList.isEmpty()){
+            products = new Product();
+            products.mode = 1;
+            jsonStringBuilder.append(products.outputJSON(false));
+        }
+        else{
+            jsonStringBuilder.append(productsList.get(productsList.size()-1).outputJSON(false));
+        }
+        jsonStringBuilder.append("],\n");
 //        jsonStringBuilder.append("        \"valuemeals\": [");
         
 //        jsonStringBuilder.append("        ],");
