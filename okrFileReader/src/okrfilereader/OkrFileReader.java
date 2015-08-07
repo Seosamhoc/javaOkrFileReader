@@ -75,7 +75,7 @@ public class OkrFileReader {
                                     transactions.get(transNum-1).destination = "drive through";
                                     break;
                             }
-                            transactions.get(transNum-1).order_number = Double.parseDouble(line.substring(14,18).trim());
+                            transactions.get(transNum-1).order_number = Integer.parseInt(line.substring(14,18).trim());
                             break;
                         case "20":
                             if (line.charAt(43) == ',')

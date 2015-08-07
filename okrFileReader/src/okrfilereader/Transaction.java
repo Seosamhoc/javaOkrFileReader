@@ -12,7 +12,7 @@ public class Transaction {
     String transaction_start_datetime;
     String transaction_end_datetime;
     String destination;
-    Double order_number; //documentation says this is decimal but shouldn't it be int?
+    int order_number; 
     Double order_sub_total;
     int is_overring;
     int deleted_items;
