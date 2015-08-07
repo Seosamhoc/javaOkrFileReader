@@ -34,7 +34,7 @@ public class Transaction {
         productsList.get(productsList.size()-1).mode = deleteStatus;
         productsList.get(productsList.size()-1).count = productQuantity;
         productsList.get(productsList.size()-1).amount = productPrice;
-        productsList.get(productsList.size()-1).price = productQuantity/productPrice;
+        productsList.get(productsList.size()-1).price = productPrice/productQuantity;
         productsList.get(productsList.size()-1).product_name = productName;
     }
     
