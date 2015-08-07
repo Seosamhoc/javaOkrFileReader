@@ -38,6 +38,9 @@ public class OkrFileReader {
             String destination;
             int cancelStatus;
             int productNum;
+            int deleteStatus;
+            int productQuantity;
+            double productPrice;
             String tenderedAmount;
             String changeAmount;
             String orderSubtotal;
@@ -75,19 +78,66 @@ public class OkrFileReader {
                             transactions.get(transNum-1).order_number = Double.parseDouble(line.substring(14,18).trim());
                             break;
                         case "20":
-                            if(line.charAt(45) == ',')
+                            if (line.charAt(43) == ',')
                             {
-                                productNum = Integer.parseInt(line.substring(44,45));
+                                if(line.charAt(45) == ',')
+                                {
+                                    productNum = Integer.parseInt(line.substring(44,45));
+                                    deleteStatus = Integer.parseInt(line.substring(46,47));
+                                    productQuantity = Integer.parseInt(line.substring(6,8).trim());
+                                    if(line.charAt(54) == '0')
+                                    {
+                                        productPrice = Double.parseDouble(line.substring(26,35).trim());
+                                        transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice);
+                                    }
+//                                    else
+//                                    {
+//                                        System.out.println("PACKAGE ITEM: ");
+//                                        System.out.println(line);
+//                                    }
+                                }
+                                else if(line.charAt(46) == ',')
+                                {
+                                    productNum = Integer.parseInt(line.substring(44,46));
+                                    deleteStatus = Integer.parseInt(line.substring(47,48));
+                                    productQuantity = Integer.parseInt(line.substring(6,8).trim());
+                                    if (line.charAt(55) == '0')
+                                    {
+                                        productPrice = Double.parseDouble(line.substring(26,35).trim());
+                                        transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice);
+                                    }
+//                                    else
+//                                    {
+//                                        System.out.println("PACKAGE ITEM: ");
+//                                        System.out.println(line);
+//                                    }
+                                }
+                                else
+                                {
+                                    productNum = Integer.parseInt(line.substring(44,47));
+                                    deleteStatus = Integer.parseInt(line.substring(48,49));
+                                    productQuantity = Integer.parseInt(line.substring(6,8).trim());
+                                    if (line.charAt(56) == '0')
+                                    {
+                                        productPrice = Double.parseDouble(line.substring(26,35).trim());
+                                        transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice);
+                                    }
+                                }
                             }
-                            else if(line.charAt(46) == ',')
+                            else if(line.charAt(61) == '0')
                             {
-                                productNum = Integer.parseInt(line.substring(44,46));
+                                
+                                productNum = Character.getNumericValue(line.charAt(51));
+                                deleteStatus = Character.getNumericValue(line.charAt(53));
+                                productPrice = Double.parseDouble(line.substring(26,35).trim());
+                                productQuantity = Integer.parseInt(line.substring(6,8).trim());
+                                transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice);    
                             }
                             else
-                            {
-                                productNum = Integer.parseInt(line.substring(44,47));
-                            }
-                            transactions.get(transNum-1).newProduct(productNum);
+                                {
+//                                    System.out.println("PACKAGE ITEM: ");
+//                                    System.out.println(line);
+                                }
                             break;
                         case "40":
                             cancelStatus = Integer.parseInt(line.substring(43,44));

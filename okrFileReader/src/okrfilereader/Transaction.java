@@ -22,12 +22,17 @@ public class Transaction {
     ArrayList<Tender> tendersList = new ArrayList();
     Tender tenders;
     
-    public void newProduct(int productNum)
+    public void newProduct(int productNum, int deleteStatus, int productQuantity, double productPrice)
     {
         products = new Product();
         productsList.add(products);
         productsList.get(productsList.size()-1).product_id = productNum;
-        //System.out.print(productsList.get(productsList.size()-1).product_id);
+        if(deleteStatus == 2)
+        {
+            deleteStatus = 3;
+        }
+        productsList.get(productsList.size()-1).mode = deleteStatus;
+        productsList.get(productsList.size()-1).count = productQuantity;
     }
     
     public void newTender(int tenderType, int cancelStatus, String tenderedAmount)
@@ -81,7 +86,7 @@ public class Transaction {
         jsonStringBuilder.append("\"order_sub_total\":\"").append(order_sub_total).append("\","); 
         jsonStringBuilder.append("\"is_overring\":\"").append(is_overring).append("\",");
         jsonStringBuilder.append("\"deleted_items\":\"").append(deleted_items).append("\",");
-        jsonStringBuilder.append("\"products\": [\n");
+        jsonStringBuilder.append("\"products\": [");
         for(int i=0; i<productsList.size()-1; i++){
             jsonStringBuilder.append(productsList.get(i).outputJSON(true));
         }
@@ -93,7 +98,7 @@ public class Transaction {
         else{
             jsonStringBuilder.append(productsList.get(productsList.size()-1).outputJSON(false));
         }
-        jsonStringBuilder.append("],\n");
+        jsonStringBuilder.append("],");
 //        jsonStringBuilder.append("        \"valuemeals\": [");
         
 //        jsonStringBuilder.append("        ],");
