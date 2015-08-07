@@ -41,6 +41,7 @@ public class OkrFileReader {
             int deleteStatus;
             int productQuantity;
             double productPrice;
+            String productName;
             String tenderedAmount;
             String changeAmount;
             String orderSubtotal;
@@ -85,10 +86,11 @@ public class OkrFileReader {
                                     productNum = Integer.parseInt(line.substring(44,45));
                                     deleteStatus = Integer.parseInt(line.substring(46,47));
                                     productQuantity = Integer.parseInt(line.substring(6,8).trim());
+                                    productName = line.substring(8,24).trim();
                                     if(line.charAt(54) == '0')
                                     {
                                         productPrice = Double.parseDouble(line.substring(26,35).trim());
-                                        transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice);
+                                        transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice, productName);
                                     }
 //                                    else
 //                                    {
@@ -101,10 +103,11 @@ public class OkrFileReader {
                                     productNum = Integer.parseInt(line.substring(44,46));
                                     deleteStatus = Integer.parseInt(line.substring(47,48));
                                     productQuantity = Integer.parseInt(line.substring(6,8).trim());
+                                    productName = line.substring(8,24).trim();
                                     if (line.charAt(55) == '0')
                                     {
                                         productPrice = Double.parseDouble(line.substring(26,35).trim());
-                                        transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice);
+                                        transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice, productName);
                                     }
 //                                    else
 //                                    {
@@ -117,10 +120,11 @@ public class OkrFileReader {
                                     productNum = Integer.parseInt(line.substring(44,47));
                                     deleteStatus = Integer.parseInt(line.substring(48,49));
                                     productQuantity = Integer.parseInt(line.substring(6,8).trim());
+                                    productName = line.substring(8,24).trim();
                                     if (line.charAt(56) == '0')
                                     {
                                         productPrice = Double.parseDouble(line.substring(26,35).trim());
-                                        transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice);
+                                        transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice, productName);
                                     }
                                 }
                             }
@@ -131,7 +135,8 @@ public class OkrFileReader {
                                 deleteStatus = Character.getNumericValue(line.charAt(53));
                                 productPrice = Double.parseDouble(line.substring(26,35).trim());
                                 productQuantity = Integer.parseInt(line.substring(6,8).trim());
-                                transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice);    
+                                productName = line.substring(8,24).trim();
+                                transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice, productName);    
                             }
                             else
                                 {
