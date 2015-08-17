@@ -6,7 +6,7 @@
  */
 public class Product {
     int product_id;
-    String third_party_id ="<blank>";
+    String third_party_id ="";
     int product_reference_uid;
     String product_name;
     int count;

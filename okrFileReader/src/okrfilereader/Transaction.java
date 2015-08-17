@@ -18,9 +18,11 @@ public class Transaction {
     int deleted_items;
     ArrayList<Product> productsList = new ArrayList();
     Product products;
+    ArrayList<Valuemeal> valuemealsList = new ArrayList();
     Valuemeal valuemeals;
     ArrayList<Tender> tendersList = new ArrayList();
     Tender tenders;
+    int lastTenderIndex;
     
     public void newProduct(int productNum, int deleteStatus, int productQuantity, double productPrice, String productName)
     {
@@ -42,39 +44,54 @@ public class Transaction {
     {
         tenders = new Tender();
         tendersList.add(tenders);
+        lastTenderIndex = tendersList.size()-1;
         switch(tenderType)
         {
-            case 40:
-                tendersList.get(tendersList.size()-1).tender_id = 12345678; //need to get this from OKR
-                tendersList.get(tendersList.size()-1).third_party_id = 7765;
-                tendersList.get(tendersList.size()-1).tender_name = "CASH";
+            case 40: case 45:
+                tendersList.get(lastTenderIndex).tender_id = 12345678; //need to get this from OKR
+                tendersList.get(lastTenderIndex).third_party_id = 7765;
+                tendersList.get(lastTenderIndex).tender_name = "CASH";
                 break;
             case 41: case 42:
-                tendersList.get(tendersList.size()-1).tender_id = 12345678; //need to get this from OKR
-                tendersList.get(tendersList.size()-1).third_party_id = 7798;
-                tendersList.get(tendersList.size()-1).tender_name = "others";
+                tendersList.get(lastTenderIndex).tender_id = 12345678; //need to get this from OKR
+                tendersList.get(lastTenderIndex).third_party_id = 7798;
+                tendersList.get(lastTenderIndex).tender_name = "others";
+                break;
+            case 51:
+                tendersList.get(lastTenderIndex).tender_id = 12345678; //need to get this from OKR
+                tendersList.get(lastTenderIndex).third_party_id = 7751;
+                tendersList.get(lastTenderIndex).tender_name = "TAX";
                 break;
         }
         switch(cancelStatus){
 //          0-Normal, 1-Cancel, 2-Full Void, 3-Partial Void, 4-Internal Void,
 //          5-Customer Refund, 6-Flushed DT, 7-Training
             case 0:
-                tendersList.get(tendersList.size()-1).amount = Double.parseDouble(tenderedAmount);
-                tendersList.get(tendersList.size()-1).count = 1;
-                tendersList.get(tendersList.size()-1).mode = 0;
+                tendersList.get(lastTenderIndex).amount = Double.parseDouble(tenderedAmount);
+                tendersList.get(lastTenderIndex).mode = 0;
                 break;
             case 1: case 6: case 7:
-                tendersList.get(tendersList.size()-1).amount = 0.00;
-                tendersList.get(tendersList.size()-1).count = 0;
-                tendersList.get(tendersList.size()-1).mode = 1;
+                tendersList.get(lastTenderIndex).amount = 0.00;
+                tendersList.get(lastTenderIndex).mode = 1;
                 break;
             case 2: case 3: case 4: case 5:
-                tendersList.get(tendersList.size()-1).amount = Double.parseDouble("-" + tenderedAmount);
-                tendersList.get(tendersList.size()-1).count = -1;
-                tendersList.get(tendersList.size()-1).mode = 3;
+                tendersList.get(lastTenderIndex).amount = Double.parseDouble("-" + tenderedAmount);
+                tendersList.get(lastTenderIndex).mode = 3;
                 break;
         }
-        
+        tendersList.get(lastTenderIndex).count = 1;
+    }
+    
+    public void newValuemeal(int productNum, int deleteStatus, int productQuantity, double productPrice, String productName){
+        valuemeals = new Valuemeal();
+        valuemealsList.add(valuemeals);
+        valuemealsList.get(valuemealsList.size()-1).valuemeal_id = productNum;
+        valuemealsList.get(valuemealsList.size()-1).valuemeal_name = productName;
+        valuemealsList.get(valuemealsList.size()-1).count = productQuantity;
+        if (deleteStatus == 2)
+            deleteStatus = 3;
+        valuemealsList.get(valuemealsList.size()-1).mode = deleteStatus;
+        valuemealsList.get(valuemealsList.size()-1).amount = productPrice;
     }
     
     public String outputJSON(Boolean comma){
@@ -86,38 +103,45 @@ public class Transaction {
         jsonStringBuilder.append("\"transaction_end_datetime\":\"").append(transaction_end_datetime).append("\",");
         jsonStringBuilder.append("\"destination\":\"").append(destination).append("\",");
         jsonStringBuilder.append("\"order_number\":\"").append(order_number).append("\",");
-        jsonStringBuilder.append("\"order_sub_total\":\"").append(order_sub_total).append("\","); 
+        jsonStringBuilder.append("\"order_sub_total\":\"").append((double)Math.round(order_sub_total*100)/100).append("\","); 
         jsonStringBuilder.append("\"is_overring\":\"").append(is_overring).append("\",");
         jsonStringBuilder.append("\"deleted_items\":\"").append(deleted_items).append("\",");
-        jsonStringBuilder.append("\"products\": [");
-        for(int i=0; i<productsList.size()-1; i++){
-            jsonStringBuilder.append(productsList.get(i).outputJSON(true));
-        }
-        if(productsList.isEmpty()){
-            products = new Product();
-            products.mode = 1;
-            jsonStringBuilder.append(products.outputJSON(false));
-        }
-        else{
+        if(!(productsList.isEmpty())){
+            jsonStringBuilder.append("\"products\": [");
+            for(int i=0; i<productsList.size()-1; i++){
+                jsonStringBuilder.append(productsList.get(i).outputJSON(true));
+            }
             jsonStringBuilder.append(productsList.get(productsList.size()-1).outputJSON(false));
+            if(!(valuemealsList.isEmpty()) || !(tendersList.isEmpty())){
+                jsonStringBuilder.append("],");
+            }
+            else{
+                jsonStringBuilder.append("]");
+            }
         }
-        jsonStringBuilder.append("],");
-//        jsonStringBuilder.append("        \"valuemeals\": [");
-        
-//        jsonStringBuilder.append("        ],");
-        jsonStringBuilder.append("\"tenders\":[");
-        for(int i=0; i<tendersList.size()-1; i++){
-            jsonStringBuilder.append(tendersList.get(i).outputJSON(true));
-        }
-        if(tendersList.isEmpty()){
-            tenders = new Tender();
-            tenders.mode = 1;
-            jsonStringBuilder.append(tenders.outputJSON(false));
+        if(!(valuemealsList.isEmpty())){
+            jsonStringBuilder.append("\"valuemeals\":[");
+            for(int i=0; i<valuemealsList.size()-1; i++){
+                jsonStringBuilder.append(valuemealsList.get(i).outputJSON(true));
+            }
+            jsonStringBuilder.append(valuemealsList.get(valuemealsList.size()-1).outputJSON(false));
+        if(!(tendersList.isEmpty())){
+            jsonStringBuilder.append("],");
         }
         else{
-            jsonStringBuilder.append(tendersList.get(tendersList.size()-1).outputJSON(false));
+            jsonStringBuilder.append("]");
         }
-        jsonStringBuilder.append("]");
+        }
+        if(!(tendersList.isEmpty())){
+        jsonStringBuilder.append("\"tenders\":[");
+        
+            for(int i=0; i<tendersList.size()-1; i++){
+                jsonStringBuilder.append(tendersList.get(i).outputJSON(true));
+            }
+            jsonStringBuilder.append(tendersList.get(tendersList.size()-1).outputJSON(false));
+        
+            jsonStringBuilder.append("]");
+        }
         if(comma){
             jsonStringBuilder.append("},");
         }
