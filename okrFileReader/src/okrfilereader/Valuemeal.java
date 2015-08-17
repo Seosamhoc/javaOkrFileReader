@@ -36,6 +36,8 @@ public class Valuemeal {
         jsonStringBuilder.append("\"amount\":\"").append(amount).append("\",");
         //jsonStringBuilder.append("\"savings\":\"").append(savings).append("\",");
         jsonStringBuilder.append("\"mode\":\"").append(mode).append("\",");
+        if(!(productsList.isEmpty()))
+        {
         jsonStringBuilder.append("\"valuemeal_products\": [");
             for(int i=0; i<productsList.size()-1; i++){
                 jsonStringBuilder.append(productsList.get(i).outputJSON(true));
@@ -43,7 +45,11 @@ public class Valuemeal {
             jsonStringBuilder.append(productsList.get(productsList.size()-1).outputJSON(false));
             
             jsonStringBuilder.append("]");
-            
+        }
+        else
+        {
+            //Empty valuemeals are possible right now before data comes from the database where meals are cancelled before a side and a drink are chosen.
+        }
         if(comma){
             jsonStringBuilder.append("},");
         }

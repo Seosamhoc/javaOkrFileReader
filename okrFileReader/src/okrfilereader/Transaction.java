@@ -75,6 +75,7 @@ public class Transaction {
                 tendersList.get(lastTenderIndex).mode = 1;
                 break;
             case 2: case 3: case 4: case 5:
+                if( tenderedAmount.charAt(0) != '-')
                 tendersList.get(lastTenderIndex).amount = Double.parseDouble("-" + tenderedAmount);
                 tendersList.get(lastTenderIndex).mode = 3;
                 break;

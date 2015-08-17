@@ -17,8 +17,8 @@ public class OkrFileReader {
     }
     public OkrFileReader(){
         
-        //String fileLocation = "C:\\Users\\blue16\\My Documents\\audit000.txt";
-        String fileLocation = "/Users/seosamh/Desktop/JSON project/audit000.txt";
+        String fileLocation = "C:\\Users\\blue16\\My Documents\\audit000.txt";
+        //String fileLocation = "/Users/seosamh/Desktop/JSON project/audit000.txt";
         long startTime = System.currentTimeMillis();
         File f = new File(fileLocation); 
         if (f.exists()) {
@@ -45,7 +45,7 @@ public class OkrFileReader {
             double productPrice;
             String productName;
             String tenderedAmount;
-            String changeAmount;
+            String changeAmount = "0.00";
             String orderSubtotal;
             String tax;
             int transNum = 0;
@@ -242,9 +242,10 @@ public class OkrFileReader {
                             transactions.get(transNum-1).newTender(42, cancelStatus, tenderedAmount);
                             break;
                         case "45": 
-                            changeAmount = "-" + line.substring(24,35).trim();
+                            changeAmount = line.substring(24,35).trim();
                             cancelStatus = Integer.parseInt(line.substring(43,44));
                             if(!(changeAmount.equals("0.00"))){
+                                changeAmount = "-" + changeAmount;
                                 transactions.get(transNum-1).newTender(45,cancelStatus, changeAmount);
                                 transactions.get(transNum-1).tendersList.get(transactions.get(transNum-1).tendersList.size()-1).is_change = "true";
                             }
@@ -256,7 +257,7 @@ public class OkrFileReader {
 //                                0-Normal, 1-Cancel, 2-Full Void, 3-Partial Void, 4-Internal Void,
 //                                5-Customer Refund, 6-Flushed DT, 7-Training
                                 case 0:
-                                    transactions.get(transNum-1).order_sub_total += Double.parseDouble(orderSubtotal);
+                                    transactions.get(transNum-1).order_sub_total = Double.parseDouble(orderSubtotal) + Double.parseDouble(changeAmount);
                                     transactions.get(transNum-1).is_overring = 0;
                                     transactions.get(transNum-1).deleted_items = 0;
                                     break;
@@ -266,7 +267,7 @@ public class OkrFileReader {
                                     transactions.get(transNum-1).deleted_items = 1;
                                     break;
                                 case 2: case 3: case 4: case 5:
-                                    transactions.get(transNum-1).order_sub_total += Double.parseDouble("-" + orderSubtotal);
+                                    transactions.get(transNum-1).order_sub_total += Double.parseDouble("-" + orderSubtotal) + Double.parseDouble(changeAmount);
                                     transactions.get(transNum-1).is_overring = 1;
                                     transactions.get(transNum-1).deleted_items = 1;
                                     break;
