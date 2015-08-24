@@ -17,8 +17,8 @@ public class OkrFileReader {
     }
     public OkrFileReader(){
         
-        String fileLocation = "C:\\Users\\blue16\\My Documents\\audit000.txt";
-        //String fileLocation = "/Users/seosamh/Desktop/JSON project/audit000.txt";
+        //String fileLocation = "C:\\Users\\blue16\\My Documents\\audit000.txt";
+        String fileLocation = "/Users/seosamh/Desktop/JSON project/audit000.txt";
         long startTime = System.currentTimeMillis();
         File f = new File(fileLocation); 
         if (f.exists()) {
@@ -273,7 +273,9 @@ public class OkrFileReader {
                                     break;
                             }
                             break;
-                        case "51":
+                        /*
+                            This is a line saying it's the tax but it's only a rough estimate
+                            case "51":
                             cancelStatus = Integer.parseInt(line.substring(43,44));
                             tax = line.substring(24,35).trim();
                             transactions.get(transNum-1).newTender(51, cancelStatus, tax);
@@ -290,7 +292,7 @@ public class OkrFileReader {
                                     transactions.get(transNum-1).order_sub_total = Double.parseDouble(tax);
                                     break;
                             }
-                            break;
+                            break;*/
                         case "52":
                             orderDate = line.substring(43,47) + "-" + line.substring(47,49)+ "-" + line.substring(49,51);
                             orderTime = line.substring(52,54) + ":" + line.substring(54,56) + ":" + line.substring(56,58);
