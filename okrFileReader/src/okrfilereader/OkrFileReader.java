@@ -1,6 +1,7 @@
 package okrfilereader;
 import java.io.*;
 import java.util.*;
+import java.sql.*;
 /**
  *
  * @author seosamh
@@ -14,9 +15,9 @@ public class OkrFileReader {
         // TODO code application logic here
         OkrFileReader thisProgram;
         thisProgram = new OkrFileReader();
+        
     }
     public OkrFileReader(){
-        
         //String fileLocation = "C:\\Users\\blue16\\My Documents\\audit000.txt";
         String fileLocation = "/Users/seosamh/Desktop/JSON project/audit000.txt";
         long startTime = System.currentTimeMillis();
@@ -89,6 +90,7 @@ public class OkrFileReader {
                                 {
                                     productNum = Integer.parseInt(line.substring(44,45));
                                     deleteStatus = Integer.parseInt(line.substring(46,47));
+                                    cancelStatus = Integer.parseInt(line.substring(48,49));
                                     productQuantity = Integer.parseInt(line.substring(6,8).trim());
                                     productName = line.substring(8,24).trim();
                                     if(line.charAt(54) == '0')
@@ -263,13 +265,13 @@ public class OkrFileReader {
                                     break;
                                 case 1: case 6: case 7:
                                     transactions.get(transNum-1).order_sub_total = 0.00;
-                                    transactions.get(transNum-1).is_overring = 2;
-                                    transactions.get(transNum-1).deleted_items = 1;
+                                    transactions.get(transNum-1).is_overring = 0;
+                                    transactions.get(transNum-1).deleted_items = 1;//An order is Either an overring or it has deleted items NOT both
                                     break;
                                 case 2: case 3: case 4: case 5:
                                     transactions.get(transNum-1).order_sub_total += Double.parseDouble("-" + orderSubtotal) + Double.parseDouble(changeAmount);
                                     transactions.get(transNum-1).is_overring = 1;
-                                    transactions.get(transNum-1).deleted_items = 1;
+                                    transactions.get(transNum-1).deleted_items = 0;//An order is Either an overring or it has deleted items NOT both
                                     break;
                             }
                             break;

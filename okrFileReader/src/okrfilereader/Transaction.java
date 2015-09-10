@@ -84,15 +84,31 @@ public class Transaction {
     }
     
     public void newValuemeal(int productNum, int deleteStatus, int productQuantity, double productPrice, String productName){
+        
         valuemeals = new Valuemeal();
         valuemealsList.add(valuemeals);
-        valuemealsList.get(valuemealsList.size()-1).valuemeal_id = productNum;
-        valuemealsList.get(valuemealsList.size()-1).valuemeal_name = productName;
-        valuemealsList.get(valuemealsList.size()-1).count = productQuantity;
+        
+        int valSize = valuemealsList.size()-1;
+        valuemealsList.get(valSize).valuemeal_id = productNum;
+        valuemealsList.get(valSize).valuemeal_name = productName;
+        valuemealsList.get(valSize).count = productQuantity;
         if (deleteStatus == 2)
             deleteStatus = 3;
-        valuemealsList.get(valuemealsList.size()-1).mode = deleteStatus;
-        valuemealsList.get(valuemealsList.size()-1).amount = productPrice;
+        valuemealsList.get(valSize).mode = deleteStatus;
+        valuemealsList.get(valSize).amount = productPrice;
+        
+        DBAccess productDB;
+        productDB = new DBAccess();
+        int mainProdNum;
+        String mainProdName;
+        mainProdNum = Integer.parseInt(productDB.DBAccess("menu/package", productNum, "menuNo", true));
+        mainProdName = productDB.DBAccess("menu/package", mainProdNum, "products");
+        valuemealsList.get(valSize).newProduct();
+        int prodSize = valuemealsList.get(valSize).productsList.size()-1;
+        valuemealsList.get(valSize).productsList.get(prodSize).product_id = mainProdNum;
+        valuemealsList.get(valSize).productsList.get(prodSize).mode = deleteStatus;
+        valuemealsList.get(valSize).productsList.get(prodSize).count = productQuantity;
+        valuemealsList.get(valSize).productsList.get(prodSize).product_name = mainProdName;
     }
     
     public String outputJSON(Boolean comma){

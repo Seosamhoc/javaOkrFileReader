@@ -1,5 +1,8 @@
  package okrfilereader;
 
+import java.math.BigDecimal;
+ import java.text.*;
+
 /**
  *
  * @author seosamh
@@ -12,13 +15,31 @@ public class Product {
     int count;
     double amount;
     double price;
-    double a_la_carte_price;
+    double centPrice;
+    String a_la_carte_price;
     int mode;
     Qualifier product_qualifiers;
     Discount product_discounts;
     
     public String outputJSON(Boolean comma){
+        DBAccess productDB;
+        productDB = new DBAccess();
+        third_party_id = productDB.DBAccess("menu/package", product_id, "bkpnNo");
+        centPrice = Double.parseDouble(productDB.DBAccess("menu/package", product_id, "price"));
+        centPrice = centPrice/100;
+        a_la_carte_price = String.valueOf(centPrice);
+        if (price == 0)
+        {
+            price = centPrice;
+        }
+        if (amount == 0)
+        {
+            amount = centPrice;
+        }
         StringBuilder jsonStringBuilder = new StringBuilder();
+//        System.out.println();
+//        System.out.println(price);
+//        System.out.println();
         jsonStringBuilder.append("{");
         jsonStringBuilder.append("\"product_id\":\"").append(product_id).append("\",");
         jsonStringBuilder.append("\"third_party_id\":\"").append(third_party_id).append("\",");
