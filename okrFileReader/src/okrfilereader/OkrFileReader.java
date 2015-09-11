@@ -19,7 +19,7 @@ public class OkrFileReader {
     }
     public OkrFileReader(){
         //String fileLocation = "C:\\Users\\blue16\\My Documents\\audit000.txt";
-        String fileLocation = "/Users/seosamh/Desktop/JSON project/audit000.txt";
+        String fileLocation = "/Users/seosamh/Desktop/JSON project/audit000 OLD.txt";
         long startTime = System.currentTimeMillis();
         File f = new File(fileLocation); 
         if (f.exists()) {
@@ -82,6 +82,7 @@ public class OkrFileReader {
                                     break;
                             }
                             transactions.get(transNum-1).order_number = Integer.parseInt(line.substring(14,18).trim());
+//                            System.out.println(transactions.get(transNum-1).order_number);
                             break;
                         case "20":
                             if (line.charAt(43) == ',')
@@ -212,6 +213,8 @@ public class OkrFileReader {
                                     productQuantity = Integer.parseInt(line.substring(6,8).trim());
                                     productName = line.substring(8,24).trim();
                                     productPrice = Double.parseDouble(line.substring(26,35).trim());
+//                                    System.out.println(line);
+//                                    System.out.println(transactions.get(transNum-1).order_number);
                                     transactions.get(transNum-1).newValuemeal(productNum, deleteStatus, productQuantity, productPrice, productName);
                                 }
                             }
@@ -259,7 +262,7 @@ public class OkrFileReader {
 //                                0-Normal, 1-Cancel, 2-Full Void, 3-Partial Void, 4-Internal Void,
 //                                5-Customer Refund, 6-Flushed DT, 7-Training
                                 case 0:
-                                    transactions.get(transNum-1).order_sub_total = Double.parseDouble(orderSubtotal) + Double.parseDouble(changeAmount);
+                                    transactions.get(transNum-1).order_sub_total = Double.parseDouble(orderSubtotal);
                                     transactions.get(transNum-1).is_overring = 0;
                                     transactions.get(transNum-1).deleted_items = 0;
                                     break;
@@ -269,7 +272,7 @@ public class OkrFileReader {
                                     transactions.get(transNum-1).deleted_items = 1;//An order is Either an overring or it has deleted items NOT both
                                     break;
                                 case 2: case 3: case 4: case 5:
-                                    transactions.get(transNum-1).order_sub_total += Double.parseDouble("-" + orderSubtotal) + Double.parseDouble(changeAmount);
+                                    transactions.get(transNum-1).order_sub_total = Double.parseDouble("-" + orderSubtotal) + Double.parseDouble(changeAmount);
                                     transactions.get(transNum-1).is_overring = 1;
                                     transactions.get(transNum-1).deleted_items = 0;//An order is Either an overring or it has deleted items NOT both
                                     break;
@@ -304,16 +307,6 @@ public class OkrFileReader {
                     }
                 }
                 indexee++;
-//                if (transactions.size() > 0 && transactions.get(transactions.size()-1).productsList.size() >0)
-//                {
-//                    System.out.println("Transaction: " + (transNum-1));
-//                    System.out.println("Line " + indexee);
-//                    System.out.println(transactions.get(
-//                            transactions.size()-1).productsList.get(
-//                                    transactions.get(transactions.size()-1).productsList.size()-1
-//                            ).product_name
-//                    );
-//                }
             }
             System.out.print("{");
             System.out.print("\"api_version\":\"2.3\",");

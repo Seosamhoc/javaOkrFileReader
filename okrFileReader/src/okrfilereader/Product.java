@@ -24,22 +24,15 @@ public class Product {
     public String outputJSON(Boolean comma){
         DBAccess productDB;
         productDB = new DBAccess();
+        product_name = productDB.DBAccess("menu/package", product_id, "products");
         third_party_id = productDB.DBAccess("menu/package", product_id, "bkpnNo");
+//        System.out.println();
+//        System.out.println(product_id);
+//        System.out.println();
         centPrice = Double.parseDouble(productDB.DBAccess("menu/package", product_id, "price"));
         centPrice = centPrice/100;
         a_la_carte_price = String.valueOf(centPrice);
-        if (price == 0)
-        {
-            price = centPrice;
-        }
-        if (amount == 0)
-        {
-            amount = centPrice;
-        }
         StringBuilder jsonStringBuilder = new StringBuilder();
-//        System.out.println();
-//        System.out.println(price);
-//        System.out.println();
         jsonStringBuilder.append("{");
         jsonStringBuilder.append("\"product_id\":\"").append(product_id).append("\",");
         jsonStringBuilder.append("\"third_party_id\":\"").append(third_party_id).append("\",");

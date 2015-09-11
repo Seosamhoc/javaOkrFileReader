@@ -101,14 +101,30 @@ public class Transaction {
         productDB = new DBAccess();
         int mainProdNum;
         String mainProdName;
-        mainProdNum = Integer.parseInt(productDB.DBAccess("menu/package", productNum, "menuNo", true));
-        mainProdName = productDB.DBAccess("menu/package", mainProdNum, "products");
         valuemealsList.get(valSize).newProduct();
         int prodSize = valuemealsList.get(valSize).productsList.size()-1;
-        valuemealsList.get(valSize).productsList.get(prodSize).product_id = mainProdNum;
         valuemealsList.get(valSize).productsList.get(prodSize).mode = deleteStatus;
         valuemealsList.get(valSize).productsList.get(prodSize).count = productQuantity;
-        valuemealsList.get(valSize).productsList.get(prodSize).product_name = mainProdName;
+        try{
+            //kid's chicken nugget meal (productNum = 179) has 4 chicken nuggets in it, which doesn't follow the standard layout
+            if (productNum == 179)
+            {
+                mainProdNum = 36;
+            }
+            else
+            {
+                mainProdNum = Integer.parseInt(productDB.DBAccess("menu/package", productNum, "menuNo", true));
+            }
+            mainProdName = productDB.DBAccess("menu/package", mainProdNum, "products");
+            valuemealsList.get(valSize).productsList.get(prodSize).product_id = mainProdNum;
+            valuemealsList.get(valSize).productsList.get(prodSize).product_name = mainProdName;
+        }
+        catch(NumberFormatException e){
+            System.out.println();
+            System.out.println("Product Number: " + productNum);
+            System.out.println("Product Name: " + productName);
+            System.out.println();
+        }
     }
     
     public String outputJSON(Boolean comma){

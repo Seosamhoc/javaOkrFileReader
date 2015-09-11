@@ -29,6 +29,7 @@ public class Valuemeal {
     public String outputJSON(Boolean comma){
         DBAccess productDB;
         productDB = new DBAccess();
+        valuemeal_name = productDB.DBAccess("menu/package", valuemeal_id, "products");
         third_party_id = productDB.DBAccess("menu/package", valuemeal_id, "bkpnNo");
         
         StringBuilder jsonStringBuilder = new StringBuilder();

@@ -23,17 +23,17 @@ public String DBAccess(String type, int menuNo, String returnColumn){
     Connection prodDBconn = null;
     String returnValue = "";
     try {
-      Class.forName("org.sqlite.JDBC");
+//      Class.forName("org.sqlite.JDBC");
       prodDBconn = DriverManager.getConnection("jdbc:sqlite:ProductDatabase.db");
     } catch ( Exception e ) {
-      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+      System.err.println( "DBAccess.java: " + e.getClass().getName() + ": " + e.getMessage()  );
       System.exit(0);
     }
     
     String queryText;
     try
     {
-        prodDBconn = DriverManager.getConnection("jdbc:sqlite:ProductDatabase.db");
+//        prodDBconn = DriverManager.getConnection("jdbc:sqlite:ProductDatabase.db");
         Statement statement = prodDBconn.createStatement();
         statement.setQueryTimeout(30);
         queryText = "SELECT " + returnColumn + " FROM productsOKR WHERE type = '" + type + "' AND menuNo = " + menuNo;
@@ -48,6 +48,7 @@ public String DBAccess(String type, int menuNo, String returnColumn){
     {
       // if the error message is "out of memory", 
       // it probably means no database file is found
+      System.err.println("See DBAccess [line 51]");
       System.err.println(e.getMessage());
     }
     finally
@@ -60,6 +61,7 @@ public String DBAccess(String type, int menuNo, String returnColumn){
       catch(SQLException e)
       {
         // connection close failed.
+        System.err.println("See DBAccess [line 63]");
         System.err.println(e);
       }
     }
@@ -88,10 +90,19 @@ public String DBAccess(String type, int menuNo, String returnColumn, Boolean isV
         String queryText;
         try
         {
-            prodDBconn = DriverManager.getConnection("jdbc:sqlite:ProductDatabase.db");
             Statement statement = prodDBconn.createStatement();
             statement.setQueryTimeout(30);
-            queryText = "SELECT menuNo FROM productsOKR WHERE type = '" + type + "' AND products = (SELECT CASE WHEN products LIKE '% Meal (Euro King)%' THEN rtrim(rtrim(products, '(Euro King)'), ' Meal') || ' (Euro King)' WHEN products LIKE '% Meal (Full Price)%' THEN rtrim(rtrim(products, '(Full Price)'), ' Meal') || ' (Full Price)' ELSE rtrim(products, ' Meal') END FROM productsOKR WHERE menuNo = "+ menuNo +" )" ;
+            queryText = "SELECT * FROM productsOKR WHERE type = 'menu/package' AND products LIKE ("; 
+            queryText += "SELECT CASE "; 
+            queryText += "WHEN products LIKE 'Large % Meal (Euro King)%' THEN substr(products, 7, length(products)-23) || ' (Euro King)'"; 
+            queryText += "WHEN products LIKE 'Large % Meal (Full Price)%' THEN substr(products, 7, length(products)-24) || ' (Full Price)'"; 
+            queryText += "WHEN products LIKE 'Large % Meal' THEN substr(products, 7, length(products)-11)"; 
+            queryText += "WHEN products LIKE '% Meal (Euro King)%' THEN substr(products, 1, length(products)-17) || ' (Euro King)' "; 
+            queryText += "WHEN products LIKE '% Meal (Full Price)%' THEN substr(products, 1, length(products)-18) || ' (Full Price)'"; 
+            queryText += "WHEN products LIKE '% Meal' THEN substr(products, 1, length(products)-5) ELSE products END "; 
+            queryText += "FROM productsOKR WHERE menuNo = ";
+            queryText += menuNo;
+            queryText += ")";
             ResultSet rs = statement.executeQuery(queryText);
             while(rs.next())
             {
@@ -113,7 +124,7 @@ public String DBAccess(String type, int menuNo, String returnColumn, Boolean isV
         {
           // if the error message is "out of memory", 
           // it probably means no database file is found
-          System.err.println(e.getMessage());
+          System.err.println("DBAccess.java: " + e.getMessage());
         }
         finally
         {
@@ -125,7 +136,7 @@ public String DBAccess(String type, int menuNo, String returnColumn, Boolean isV
           catch(SQLException e)
           {
             // connection close failed.
-            System.err.println(e);
+            System.err.println("DBAccess.java: " + e);
           }
         }
     }
