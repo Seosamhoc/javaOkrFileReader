@@ -16,6 +16,8 @@ public class Transaction {
     Double order_sub_total;
     int is_overring;
     int deleted_items;
+    ArrayList<Discount> discountsList = new ArrayList();
+    Discount discounts;
     ArrayList<Product> productsList = new ArrayList();
     Product products;
     ArrayList<Valuemeal> valuemealsList = new ArrayList();
@@ -23,6 +25,19 @@ public class Transaction {
     ArrayList<Tender> tendersList = new ArrayList();
     Tender tenders;
     int lastTenderIndex;
+    int discountSize;
+    
+    public void newDiscount(String discountName, int discountNum, int deleteStatus, double discountValue, int thirdPartyId)
+    {
+        discounts = new Discount();
+        discountsList.add(discounts);
+        discountSize = discountsList.size()-1;
+        discountsList.get(discountSize).discount_id = discountNum;
+        discountsList.get(discountSize).discount_name = discountName;
+        discountsList.get(discountSize).amount = discountValue;
+        discountsList.get(discountSize).count = 1;
+        discountsList.get(discountSize).third_party_id = thirdPartyId;
+    }
     
     public void newProduct(int productNum, int deleteStatus, int productQuantity, double productPrice, String productName)
     {
@@ -145,7 +160,7 @@ public class Transaction {
                 jsonStringBuilder.append(productsList.get(i).outputJSON(true));
             }
             jsonStringBuilder.append(productsList.get(productsList.size()-1).outputJSON(false));
-            if(!(valuemealsList.isEmpty()) || !(tendersList.isEmpty())){
+            if(!(discountsList.isEmpty()) || !(valuemealsList.isEmpty()) || !(tendersList.isEmpty())){
                 jsonStringBuilder.append("],");
             }
             else{
@@ -158,7 +173,21 @@ public class Transaction {
                 jsonStringBuilder.append(valuemealsList.get(i).outputJSON(true));
             }
             jsonStringBuilder.append(valuemealsList.get(valuemealsList.size()-1).outputJSON(false));
-        if(!(tendersList.isEmpty())){
+        if(!(discountsList.isEmpty()) || !(tendersList.isEmpty())){
+            jsonStringBuilder.append("],");
+        }
+        else{
+            jsonStringBuilder.append("]");
+        }
+        }
+        if(!(discountsList.isEmpty())){
+            jsonStringBuilder.append("\"order_discounts\"");
+        
+            for(int i =0; i<discountsList.size()-1; i++){
+                jsonStringBuilder.append(discountsList.get(i).outputJSON(true));
+            }
+            jsonStringBuilder.append(discountsList.get(discountsList.size()-1).outputJSON(false));
+            if(!(tendersList.isEmpty())){
             jsonStringBuilder.append("],");
         }
         else{
@@ -166,7 +195,7 @@ public class Transaction {
         }
         }
         if(!(tendersList.isEmpty())){
-        jsonStringBuilder.append("\"tenders\":[");
+            jsonStringBuilder.append("\"tenders\":[");
         
             for(int i=0; i<tendersList.size()-1; i++){
                 jsonStringBuilder.append(tendersList.get(i).outputJSON(true));

@@ -117,7 +117,7 @@ public String DBAccess(String type, int menuNo, String returnColumn, Boolean isV
             }
             else
             {
-                System.err.println("Query Failed to find itemMenuNo!");
+                System.err.println("Query Failed to find itemMenuNo! " + itemMenuNo + " " + menuNo);
             }
         }
         catch(SQLException e)

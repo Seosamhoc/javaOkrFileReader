@@ -19,7 +19,7 @@ public class OkrFileReader {
     }
     public OkrFileReader(){
         //String fileLocation = "C:\\Users\\blue16\\My Documents\\audit000.txt";
-        String fileLocation = "/Users/seosamh/Desktop/JSON project/audit000 OLD.txt";
+        String fileLocation = "/Users/seosamh/Desktop/JSON project/audit000.txt";
         long startTime = System.currentTimeMillis();
         File f = new File(fileLocation); 
         if (f.exists()) {
@@ -44,6 +44,9 @@ public class OkrFileReader {
             int valSize;
             int prodSize;
             double productPrice;
+            double discountValue;
+            int discountPercentage;
+            int thirdPartyId;
             String productName;
             String tenderedAmount;
             String changeAmount = "0.00";
@@ -228,6 +231,19 @@ public class OkrFileReader {
                                 transactions.get(transNum-1).newValuemeal(productNum, deleteStatus, productQuantity, productPrice, productName);
                                 transactions.get(transNum-1).valuemealsList.get(transactions.get(transNum-1).valuemealsList.size()-1).newProduct();
                             }
+                            break;
+                        case "32":
+                            deleteStatus = Character.getNumericValue(line.charAt(45));
+                            discountValue = Double.parseDouble(line.substring(26,35).trim());
+                            discountPercentage = Integer.parseInt(line.substring(49,52));
+                            if (discountPercentage == 100)
+                            {
+                                thirdPartyId = 92553539;
+                            }
+                            else{
+                                thirdPartyId = 95838532;
+                            }
+                            transactions.get(transNum-1).newDiscount("Employee Discount", 30, deleteStatus, discountValue, thirdPartyId);
                             break;
                         case "40":
                             cancelStatus = Integer.parseInt(line.substring(43,44));

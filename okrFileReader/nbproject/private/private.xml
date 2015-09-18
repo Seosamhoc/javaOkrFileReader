@@ -8,6 +8,7 @@
             <file>file:/_dev/javaOkrFileReader/okrFileReader/src/okrfilereader/OkrFileReader.java</file>
             <file>file:/_dev/javaOkrFileReader/okrFileReader/src/okrfilereader/Transaction.java</file>
             <file>file:/_dev/javaOkrFileReader/okrFileReader/src/okrfilereader/Product.java</file>
+            <file>file:/_dev/javaOkrFileReader/okrFileReader/src/okrfilereader/DBCreate.java</file>
         </group>
     </open-files>
 </project-private>
