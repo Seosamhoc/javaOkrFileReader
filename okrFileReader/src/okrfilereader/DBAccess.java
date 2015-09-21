@@ -23,7 +23,7 @@ public String DBAccess(String type, int menuNo, String returnColumn){
     Connection prodDBconn = null;
     String returnValue = "";
     try {
-//      Class.forName("org.sqlite.JDBC");
+      Class.forName("org.sqlite.JDBC");
       prodDBconn = DriverManager.getConnection("jdbc:sqlite:ProductDatabase.db");
     } catch ( Exception e ) {
       System.err.println( "DBAccess.java: " + e.getClass().getName() + ": " + e.getMessage()  );

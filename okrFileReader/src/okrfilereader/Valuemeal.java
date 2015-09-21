@@ -31,6 +31,15 @@ public class Valuemeal {
         productDB = new DBAccess();
         valuemeal_name = productDB.DBAccess("menu/package", valuemeal_id, "products");
         third_party_id = productDB.DBAccess("menu/package", valuemeal_id, "bkpnNo");
+        savings = 0;
+        
+        for(int i=0; i<productsList.size(); i++)
+        {
+            savings += Double.parseDouble(productDB.DBAccess("menu/package", productsList.get(i).product_id, "price"));
+        }
+        savings = (double)Math.round(savings *0.8965);
+        savings = savings - amount*100;
+        savings = savings/100;
         
         StringBuilder jsonStringBuilder = new StringBuilder();
         jsonStringBuilder.append("{");
@@ -39,12 +48,13 @@ public class Valuemeal {
         jsonStringBuilder.append("\"product_name\":\"").append(valuemeal_name).append("\",");
         jsonStringBuilder.append("\"count\":\"").append(count).append("\",");
         jsonStringBuilder.append("\"amount\":\"").append(amount).append("\",");
-        //jsonStringBuilder.append("\"savings\":\"").append(savings).append("\",");
+        jsonStringBuilder.append("\"savings\":\"").append(savings).append("\",");
         jsonStringBuilder.append("\"mode\":\"").append(mode).append("\",");
         if(!(productsList.isEmpty()))
         {
         jsonStringBuilder.append("\"valuemeal_products\": [");
-            for(int i=0; i<productsList.size()-1; i++){
+            for(int i=0; i<productsList.size()-1; i++)
+            {
                 jsonStringBuilder.append(productsList.get(i).outputJSON(true));
             }
             jsonStringBuilder.append(productsList.get(productsList.size()-1).outputJSON(false));

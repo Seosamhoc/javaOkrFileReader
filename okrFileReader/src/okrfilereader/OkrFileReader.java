@@ -1,7 +1,6 @@
 package okrfilereader;
 import java.io.*;
 import java.util.*;
-import java.sql.*;
 /**
  *
  * @author seosamh
@@ -43,14 +42,22 @@ public class OkrFileReader {
             int productQuantity;
             int valSize;
             int prodSize;
+            int qualifierCount;
+            String modifierName;
+            int modifierId;
+            int qualifierId;
+            int qualSize;
+            int modIdPosition;
             double productPrice;
             double discountValue;
-            int discountPercentage;
+            double taxTotal;
             int thirdPartyId;
+            Boolean isValuemealQualifier = null;
+            String discountName;
             String productName;
             String tenderedAmount;
             String changeAmount = "0.00";
-            String orderSubtotal;
+            Double orderSubtotal;
             String tax;
             int transNum = 0;
             int indexee =0;
@@ -85,7 +92,6 @@ public class OkrFileReader {
                                     break;
                             }
                             transactions.get(transNum-1).order_number = Integer.parseInt(line.substring(14,18).trim());
-//                            System.out.println(transactions.get(transNum-1).order_number);
                             break;
                         case "20":
                             if (line.charAt(43) == ',')
@@ -101,6 +107,7 @@ public class OkrFileReader {
                                     {
                                         productPrice = Double.parseDouble(line.substring(26,35).trim());
                                         transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice, productName);
+                                        isValuemealQualifier = false;
                                     }
                                     else
                                     {
@@ -111,6 +118,7 @@ public class OkrFileReader {
                                         transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).mode = deleteStatus;
                                         transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).count = productQuantity;
                                         transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_name = productName;
+                                        isValuemealQualifier = true;
                                     }
                                 }
                                 else if(line.charAt(46) == ',')
@@ -123,6 +131,7 @@ public class OkrFileReader {
                                     {
                                         productPrice = Double.parseDouble(line.substring(26,35).trim());
                                         transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice, productName);
+                                        isValuemealQualifier = false;
                                     }
                                     else
                                     {
@@ -133,6 +142,7 @@ public class OkrFileReader {
                                         transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).mode = deleteStatus;
                                         transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).count = productQuantity;
                                         transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_name = productName;
+                                        isValuemealQualifier = true;
                                     }
                                 }
                                 else
@@ -145,6 +155,7 @@ public class OkrFileReader {
                                     {
                                         productPrice = Double.parseDouble(line.substring(26,35).trim());
                                         transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice, productName);
+                                        isValuemealQualifier = false;
                                     }
                                     else
                                     {
@@ -155,6 +166,7 @@ public class OkrFileReader {
                                         transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).mode = deleteStatus;
                                         transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).count = productQuantity;
                                         transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_name = productName;
+                                        isValuemealQualifier = true;
                                     }
                                 }
                             }
@@ -165,7 +177,8 @@ public class OkrFileReader {
                                 productPrice = Double.parseDouble(line.substring(26,35).trim());
                                 productQuantity = Integer.parseInt(line.substring(6,8).trim());
                                 productName = line.substring(8,24).trim();
-                                transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice, productName);    
+                                transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice, productName);   
+                                isValuemealQualifier = false;
                             }
                             else
                                 {
@@ -185,6 +198,7 @@ public class OkrFileReader {
                                     transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).mode = deleteStatus;
                                     transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).count = productQuantity;
                                     transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_name = productName;
+                                    isValuemealQualifier = true;
                                 }
                             break;
                         case "21":
@@ -216,8 +230,6 @@ public class OkrFileReader {
                                     productQuantity = Integer.parseInt(line.substring(6,8).trim());
                                     productName = line.substring(8,24).trim();
                                     productPrice = Double.parseDouble(line.substring(26,35).trim());
-//                                    System.out.println(line);
-//                                    System.out.println(transactions.get(transNum-1).order_number);
                                     transactions.get(transNum-1).newValuemeal(productNum, deleteStatus, productQuantity, productPrice, productName);
                                 }
                             }
@@ -231,19 +243,96 @@ public class OkrFileReader {
                                 transactions.get(transNum-1).newValuemeal(productNum, deleteStatus, productQuantity, productPrice, productName);
                                 transactions.get(transNum-1).valuemealsList.get(transactions.get(transNum-1).valuemealsList.size()-1).newProduct();
                             }
+                            isValuemealQualifier = true;
                             break;
-                        case "32":
+                        case "22":
+                            try
+                            {
+                                qualifierCount = Integer.parseInt(line.substring(5, 9).trim());
+                            }
+                            catch(Exception e)
+                            {
+                                qualifierCount = 1;
+                            }
+                            modifierName = line.substring(9,16).trim();
+                            modIdPosition = line.length()-2;
+                            modifierId = Character.getNumericValue(line.charAt(modIdPosition));
+                            if (line.charAt(45)==',')
+                            {
+                                qualifierId = Character.getNumericValue(line.charAt(44));
+                            }
+                            else if (line.charAt(46)==',')
+                            {
+                                qualifierId = Integer.parseInt(line.substring(44, 45));
+                            }
+                            else
+                            {
+                                qualifierId = Integer.parseInt(line.substring(44, 46));
+                            }
+                            try{
+                                productPrice = Double.parseDouble(line.substring(26,35).trim());
+                            }
+                            catch (Exception e)
+                            {
+                                productPrice = 0.00;
+                            }
+                            if (isValuemealQualifier)
+                            {
+                                valSize = transactions.get(transNum-1).valuemealsList.size()-1;
+                                prodSize = transactions.get(transNum-1).valuemealsList.get(valSize).productsList.size()-1;
+                                transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).newQualifer(qualifierCount, modifierName, modifierId, qualifierId, productPrice);
+                                qualSize = transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).qualifiersList.size()-1;
+                                transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).isValuemealQualifier = isValuemealQualifier;
+                            }
+                            else
+                            {
+                                prodSize = (transactions.get(transNum-1).productsList.size())-1;
+                                transactions.get(transNum-1).productsList.get(prodSize).newQualifer(qualifierCount, modifierName, modifierId, qualifierId, productPrice);
+                                qualSize = transactions.get(transNum-1).productsList.get(prodSize).qualifiersList.size()-1;
+                                transactions.get(transNum-1).productsList.get(prodSize).isValuemealQualifier = isValuemealQualifier;
+                            }
+                                
+                            
+                            break;
+                        case "31":
                             deleteStatus = Character.getNumericValue(line.charAt(45));
                             discountValue = Double.parseDouble(line.substring(26,35).trim());
-                            discountPercentage = Integer.parseInt(line.substring(49,52));
-                            if (discountPercentage == 100)
+                            discountName = line.substring(8,24).trim();
+                            //Percentage discount below. Used to determine if the order is free or not.
+                            if (line.substring(49,52).equals("100") || line.substring(50,53).equals("100"))
                             {
                                 thirdPartyId = 92553539;
                             }
                             else{
                                 thirdPartyId = 95838532;
                             }
-                            transactions.get(transNum-1).newDiscount("Employee Discount", 30, deleteStatus, discountValue, thirdPartyId);
+                            transactions.get(transNum-1).newDiscount(discountName, 31, deleteStatus, discountValue, thirdPartyId);
+                            break;
+                        case "32":
+                            deleteStatus = Character.getNumericValue(line.charAt(45));
+                            discountValue = Double.parseDouble(line.substring(26,35).trim());
+                            //Percentage discount below. Used to determine if the order is free or not.
+                            if (line.substring(49,52).equals("100"))
+                            {
+                                thirdPartyId = 92553539;
+                            }
+                            else{
+                                thirdPartyId = 95838532;
+                            }
+                            transactions.get(transNum-1).newDiscount("Employee Discount", 32, deleteStatus, discountValue, thirdPartyId);
+                            break;
+                        case "33":
+                            deleteStatus = Character.getNumericValue(line.charAt(45));
+                            discountValue = Double.parseDouble(line.substring(26,35).trim());
+                            //Percentage discount below. Used to determine if the order is free or not.
+                            if (line.substring(47,50).equals("100"))
+                            {
+                                thirdPartyId = 92553539;
+                            }
+                            else{
+                                thirdPartyId = 95838532;
+                            }
+                            transactions.get(transNum-1).newDiscount("Manager Discount", 33, deleteStatus, discountValue, thirdPartyId);
                             break;
                         case "40":
                             cancelStatus = Integer.parseInt(line.substring(43,44));
@@ -273,12 +362,17 @@ public class OkrFileReader {
                             break;
                         case "50":
                             cancelStatus = Integer.parseInt(line.substring(43,44));
-                            orderSubtotal = line.substring(24,35).trim();
+                            orderSubtotal = (double)Math.round(((Double.parseDouble(line.substring(24,35).trim())))*89.65);
+                            
+                            taxTotal = (double)Math.round(Double.parseDouble(line.substring(24,35).trim())*100) - orderSubtotal;
+                            taxTotal = taxTotal/100;
+                            orderSubtotal = orderSubtotal/100;
                             switch(cancelStatus){
 //                                0-Normal, 1-Cancel, 2-Full Void, 3-Partial Void, 4-Internal Void,
 //                                5-Customer Refund, 6-Flushed DT, 7-Training
                                 case 0:
-                                    transactions.get(transNum-1).order_sub_total = Double.parseDouble(orderSubtotal);
+                                    transactions.get(transNum-1).order_sub_total = orderSubtotal;
+                                    transactions.get(transNum-1).newTender(51, cancelStatus, String.valueOf(taxTotal));
                                     transactions.get(transNum-1).is_overring = 0;
                                     transactions.get(transNum-1).deleted_items = 0;
                                     break;

@@ -29,6 +29,8 @@ public class Transaction {
     
     public void newDiscount(String discountName, int discountNum, int deleteStatus, double discountValue, int thirdPartyId)
     {
+        discountValue = (double)Math.round(discountValue * 89.65);
+        discountValue = discountValue/100;
         discounts = new Discount();
         discountsList.add(discounts);
         discountSize = discountsList.size()-1;
@@ -41,6 +43,8 @@ public class Transaction {
     
     public void newProduct(int productNum, int deleteStatus, int productQuantity, double productPrice, String productName)
     {
+        productPrice = (double)Math.round(productPrice * 89.65);
+        productPrice = productPrice/100;
         products = new Product();
         productsList.add(products);
         productsList.get(productsList.size()-1).product_id = productNum;
@@ -98,8 +102,10 @@ public class Transaction {
         tendersList.get(lastTenderIndex).count = 1;
     }
     
-    public void newValuemeal(int productNum, int deleteStatus, int productQuantity, double productPrice, String productName){
-        
+    public void newValuemeal(int productNum, int deleteStatus, int productQuantity, double productPrice, String productName)
+    {
+        productPrice = (double)Math.round(productPrice * 89.65);
+        productPrice = productPrice/100;
         valuemeals = new Valuemeal();
         valuemealsList.add(valuemeals);
         
@@ -181,7 +187,7 @@ public class Transaction {
         }
         }
         if(!(discountsList.isEmpty())){
-            jsonStringBuilder.append("\"order_discounts\"");
+            jsonStringBuilder.append("\"order_discounts\":[");
         
             for(int i =0; i<discountsList.size()-1; i++){
                 jsonStringBuilder.append(discountsList.get(i).outputJSON(true));
