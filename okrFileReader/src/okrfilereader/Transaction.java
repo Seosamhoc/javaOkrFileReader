@@ -26,6 +26,7 @@ public class Transaction {
     Tender tenders;
     int lastTenderIndex;
     int discountSize;
+    boolean skipTransaction = false;
     
     public void newDiscount(String discountName, int discountNum, int deleteStatus, double discountValue, int thirdPartyId)
     {
@@ -146,7 +147,7 @@ public class Transaction {
         }
     }
     
-    public String outputJSON(Boolean comma){
+    public String outputJSON(){
         StringBuilder jsonStringBuilder = new StringBuilder();
         jsonStringBuilder.append("{");
         jsonStringBuilder.append("\"sale_id\"" + ":\"").append(sale_id).append("\",");
@@ -158,12 +159,14 @@ public class Transaction {
         jsonStringBuilder.append("\"order_sub_total\":\"").append((double)Math.round(order_sub_total*100)/100).append("\","); 
         jsonStringBuilder.append("\"is_overring\":\"").append(is_overring).append("\",");
         jsonStringBuilder.append("\"deleted_items\":\"").append(deleted_items).append("\",");
+        int j = 0;
         if(!(productsList.isEmpty())){
             jsonStringBuilder.append("\"products\": [");
-            for(int i=0; i<productsList.size()-1; i++){
-                jsonStringBuilder.append(productsList.get(i).outputJSON(true));
+            for (Product productsListItem : productsList) {
+                if (j > 0) jsonStringBuilder.append(',');
+                jsonStringBuilder.append(productsListItem.outputJSON());
+                j++;
             }
-            jsonStringBuilder.append(productsList.get(productsList.size()-1).outputJSON(false));
             if(!(discountsList.isEmpty()) || !(valuemealsList.isEmpty()) || !(tendersList.isEmpty())){
                 jsonStringBuilder.append("],");
             }
@@ -171,50 +174,50 @@ public class Transaction {
                 jsonStringBuilder.append("]");
             }
         }
+        j = 0;
         if(!(valuemealsList.isEmpty())){
             jsonStringBuilder.append("\"valuemeals\":[");
-            for(int i=0; i<valuemealsList.size()-1; i++){
-                jsonStringBuilder.append(valuemealsList.get(i).outputJSON(true));
+            for (Valuemeal valuemealsListItem : valuemealsList) {
+                if (j > 0) jsonStringBuilder.append(',');
+                jsonStringBuilder.append(valuemealsListItem.outputJSON());
+                j++;
             }
-            jsonStringBuilder.append(valuemealsList.get(valuemealsList.size()-1).outputJSON(false));
-        if(!(discountsList.isEmpty()) || !(tendersList.isEmpty())){
-            jsonStringBuilder.append("],");
+            if(!(discountsList.isEmpty()) || !(tendersList.isEmpty())){
+                jsonStringBuilder.append("],");
+            }
+            else{
+                jsonStringBuilder.append("]");
+            }
         }
-        else{
-            jsonStringBuilder.append("]");
-        }
-        }
+        j = 0;
         if(!(discountsList.isEmpty())){
             jsonStringBuilder.append("\"order_discounts\":[");
         
-            for(int i =0; i<discountsList.size()-1; i++){
-                jsonStringBuilder.append(discountsList.get(i).outputJSON(true));
+            for (Discount discountsListItem : discountsList) {
+                if (j > 0) jsonStringBuilder.append(',');
+                jsonStringBuilder.append(discountsListItem.outputJSON());
+                j++;
             }
-            jsonStringBuilder.append(discountsList.get(discountsList.size()-1).outputJSON(false));
             if(!(tendersList.isEmpty())){
-            jsonStringBuilder.append("],");
+                jsonStringBuilder.append("],");
+            }
+            else{
+                jsonStringBuilder.append("]");
+            }
         }
-        else{
-            jsonStringBuilder.append("]");
-        }
-        }
+        j = 0;
         if(!(tendersList.isEmpty())){
             jsonStringBuilder.append("\"tenders\":[");
         
-            for(int i=0; i<tendersList.size()-1; i++){
-                jsonStringBuilder.append(tendersList.get(i).outputJSON(true));
+            for (Tender tendersListItem : tendersList) {
+                if (j > 0) jsonStringBuilder.append(',');
+                jsonStringBuilder.append(tendersListItem.outputJSON());
+                j++;
             }
-            jsonStringBuilder.append(tendersList.get(tendersList.size()-1).outputJSON(false));
         
             jsonStringBuilder.append("]");
         }
-        if(comma){
-            jsonStringBuilder.append("},");
-        }
-        else
-        {
-            jsonStringBuilder.append("}");
-        }
+        jsonStringBuilder.append("}");
         String jsonString = jsonStringBuilder.toString();
         return jsonString;
     }

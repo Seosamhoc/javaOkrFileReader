@@ -56,7 +56,7 @@ public class Product {
         qualifiersList.add(qualifiers);
     }
     
-    public String outputJSON(Boolean comma){
+    public String outputJSON(){
         DBAccess productDB;
         productDB = new DBAccess();
         product_name = productDB.DBAccess("menu/package", product_id, "products");
@@ -85,20 +85,15 @@ public class Product {
             {
                 jsonStringBuilder.append(",\"product_qualifiers\":[");
             }
-            for(int i=0; i<qualifiersList.size()-1; i++){
-                jsonStringBuilder.append(qualifiersList.get(i).outputJSON(true));
+            int j =0;
+            for (Qualifier qualifiersListItem : qualifiersList) {
+                if (j > 0) jsonStringBuilder.append(',');
+                jsonStringBuilder.append(qualifiersListItem.outputJSON());
+                j++;
             }
-            jsonStringBuilder.append(qualifiersList.get(qualifiersList.size()-1).outputJSON(false));
             jsonStringBuilder.append("]");
         }
-        
-        if(comma){
-            jsonStringBuilder.append("},");
-        }
-        else
-        {
-            jsonStringBuilder.append("}");
-        }
+        jsonStringBuilder.append("}");
         String jsonString = jsonStringBuilder.toString();
         return jsonString;
     }

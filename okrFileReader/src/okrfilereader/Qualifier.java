@@ -18,7 +18,7 @@ public class Qualifier {
     double a_la_carte_price;
     int mode = 0;
     
-    public String outputJSON(Boolean comma){
+    public String outputJSON(){
         StringBuilder jsonStringBuilder = new StringBuilder();
         jsonStringBuilder.append("{");
         jsonStringBuilder.append("\"modifier_id\":\"").append(modifier_id).append("\",");
@@ -32,13 +32,7 @@ public class Qualifier {
         jsonStringBuilder.append("\"price\":\"").append(price).append("\",");
         jsonStringBuilder.append("\"a_la_carte_price\":\"").append(a_la_carte_price).append("\",");
         jsonStringBuilder.append("\"mode\":\"").append(mode).append("\"");
-        if(comma){
-            jsonStringBuilder.append("},");
-        }
-        else
-        {
-            jsonStringBuilder.append("}");
-        }
+        jsonStringBuilder.append("}");
         String jsonString = jsonStringBuilder.toString();
         return jsonString;
     }

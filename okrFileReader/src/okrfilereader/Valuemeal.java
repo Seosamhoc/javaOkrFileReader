@@ -25,8 +25,7 @@ public class Valuemeal {
         products.amount = 0.00;
         productsList.add(products);
     }
-    
-    public String outputJSON(Boolean comma){
+    public String outputJSON(){
         DBAccess productDB;
         productDB = new DBAccess();
         valuemeal_name = productDB.DBAccess("menu/package", valuemeal_id, "products");
@@ -53,25 +52,20 @@ public class Valuemeal {
         if(!(productsList.isEmpty()))
         {
         jsonStringBuilder.append("\"valuemeal_products\": [");
-            for(int i=0; i<productsList.size()-1; i++)
-            {
-                jsonStringBuilder.append(productsList.get(i).outputJSON(true));
+        int j = 0;
+            for (Product productsListItem : productsList) {
+                if (j > 0) jsonStringBuilder.append(',');
+                jsonStringBuilder.append(productsListItem.outputJSON());
+                j++;
             }
-            jsonStringBuilder.append(productsList.get(productsList.size()-1).outputJSON(false));
-            
             jsonStringBuilder.append("]");
         }
         else
         {
             //Empty valuemeals are possible right now before data comes from the database where meals are cancelled before a side and a drink are chosen.
+            //This should no longer be a problem as orders cancelled that earlier aren't shown, (and shouldn't be).
         }
-        if(comma){
-            jsonStringBuilder.append("},");
-        }
-        else
-        {
-            jsonStringBuilder.append("}");
-        }
+        jsonStringBuilder.append("}");
         String jsonString = jsonStringBuilder.toString();
         return jsonString;
     }

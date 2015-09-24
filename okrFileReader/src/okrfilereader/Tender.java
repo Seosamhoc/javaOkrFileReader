@@ -14,7 +14,7 @@ public class Tender {
     String is_change = "false";
     int mode;
     
-    public String outputJSON(Boolean comma){
+    public String outputJSON(){
         StringBuilder jsonStringBuilder = new StringBuilder();
         jsonStringBuilder.append("{");
         jsonStringBuilder.append("\"tender_id\":\"").append(tender_id).append("\",");
@@ -24,13 +24,7 @@ public class Tender {
         jsonStringBuilder.append("\"amount\":\"").append(amount).append("\",");
         jsonStringBuilder.append("\"is_change\":\"").append(is_change).append("\",");
         jsonStringBuilder.append("\"mode\":\"").append(mode).append("\"");
-        if(comma){
-            jsonStringBuilder.append("},");
-        }
-        else
-        {
-            jsonStringBuilder.append("}");
-        }
+        jsonStringBuilder.append("}");
         String jsonString = jsonStringBuilder.toString();
         return jsonString;
     }

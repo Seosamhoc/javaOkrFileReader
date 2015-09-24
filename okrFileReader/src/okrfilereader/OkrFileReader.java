@@ -72,7 +72,10 @@ public class OkrFileReader {
                         case "02":
                             transactions.get(transNum-1).sale_id = Integer.parseInt(line.substring(15,23));
                             break;
-                        case "10": case "11": case "12": case "13": case "14": case "15": case "16": case "17":
+                        case "11":
+                            transactions.get(transNum-1).skipTransaction = true;
+                            break;
+                        case "10":  case "12": case "13": case "14": case "15": case "16": case "17":
 //                            10-Completed Order, 11-Cancelled Order, 12-Full Order Void, 13-Partial Order Void 
 //                            14-Internal Void, 15-Customer Refund, 16-Flushed Drive-thru Order, 17-Training Order
                             orderDate = line.substring(43,47) + "-" + line.substring(47,49)+ "-" + line.substring(49,51);
@@ -190,10 +193,6 @@ public class OkrFileReader {
                                     transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_name = productName;
                                     isValuemeal = true;
                                 }
-//                            if(deleteStatus != 0)
-//                            {
-//                                System.exit(0);
-//                            }
                             break;
                         case "21":
                             productPrice = Double.parseDouble(line.substring(26,35).trim());
@@ -400,22 +399,27 @@ public class OkrFileReader {
                 }
                 indexee++;
             }
-            System.out.print("{");
-            System.out.print("\"api_version\":\"2.3\",");
-            System.out.print("\"password\":\"password here\",");
-            System.out.print("\"method\":\"addTlogs\",");
-            System.out.print("\"provider\":\"okr\",");
-            System.out.print("\"params\":{");
-            System.out.print("\"restaurant_id\":\"7651\",");
-            System.out.print("\"tlogs\":[");
-            for(int i=0;i<transactions.size()-1; i++)
-            {
-                System.out.print(transactions.get(i).outputJSON(true));
+            StringBuilder jsonStringBuilder = new StringBuilder();
+            jsonStringBuilder.append("{");
+            jsonStringBuilder.append("\"api_version\":\"2.3\",");
+            jsonStringBuilder.append("\"password\":\"password here\",");
+            jsonStringBuilder.append("\"method\":\"addTlogs\",");
+            jsonStringBuilder.append("\"provider\":\"okr\",");
+            jsonStringBuilder.append("\"params\":{");
+            jsonStringBuilder.append("\"restaurant_id\":\"7651\",");
+            jsonStringBuilder.append("\"tlogs\":[");
+            int j = 0;
+            for (Transaction transaction : transactions) {
+                if (!transaction.skipTransaction) {
+                    if (j > 0) jsonStringBuilder.append(',');
+                    jsonStringBuilder.append(transaction.outputJSON());
+                    j++;
+                }
             }
-            System.out.print(transactions.get(transactions.size()-1).outputJSON(false));
-            System.out.print("]" );
-            System.out.print("}" );
-            System.out.print("}\n");
+            jsonStringBuilder.append("]" );
+            jsonStringBuilder.append("}" );
+            jsonStringBuilder.append("}\n");
+            System.out.print(jsonStringBuilder);
             in.close();
         } 
         catch (IOException e) {

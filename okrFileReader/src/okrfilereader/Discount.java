@@ -13,7 +13,7 @@ public class Discount {
     double amount;
     int mode;
     
-    public String outputJSON(Boolean comma){
+    public String outputJSON(){
         StringBuilder jsonStringBuilder = new StringBuilder();
         jsonStringBuilder.append("{");
         jsonStringBuilder.append("\"discount_id\":\"").append(discount_id).append("\",");
@@ -22,13 +22,7 @@ public class Discount {
         jsonStringBuilder.append("\"count\":\"").append(count).append("\",");
         jsonStringBuilder.append("\"amount\":\"").append(amount).append("\",");
         jsonStringBuilder.append("\"mode\":\"").append(mode).append("\"");
-        if(comma){
-            jsonStringBuilder.append("},");
-        }
-        else
-        {
-            jsonStringBuilder.append("}");
-        }
+        jsonStringBuilder.append("}");
         String jsonString = jsonStringBuilder.toString();
         return jsonString;
     }
