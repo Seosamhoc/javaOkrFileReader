@@ -38,7 +38,7 @@ public class Valuemeal {
             savings += Double.parseDouble(productDB.DBAccess("menu/package", productsList.get(i).product_id, "price"));
         }
         savings = (double)Math.round(savings *0.8965);
-        savings = savings - amount*100;
+        savings = savings - Math.abs(amount)*100;
         savings = savings/100;
         
         StringBuilder jsonStringBuilder = new StringBuilder();

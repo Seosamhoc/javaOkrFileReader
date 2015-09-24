@@ -52,13 +52,12 @@ public class OkrFileReader {
             double discountValue;
             double taxTotal;
             int thirdPartyId;
-            Boolean isValuemealQualifier = null;
+            Boolean isValuemeal = null;
             String discountName;
             String productName;
             String tenderedAmount;
             String changeAmount = "0.00";
             Double orderSubtotal;
-            String tax;
             int transNum = 0;
             int indexee =0;
             while ((line = in.readLine()) != null) {
@@ -101,73 +100,59 @@ public class OkrFileReader {
                                     productNum = Integer.parseInt(line.substring(44,45));
                                     deleteStatus = Integer.parseInt(line.substring(46,47));
                                     cancelStatus = Integer.parseInt(line.substring(48,49));
-                                    productQuantity = Integer.parseInt(line.substring(6,8).trim());
-                                    productName = line.substring(8,24).trim();
                                     if(line.charAt(54) == '0')
-                                    {
-                                        productPrice = Double.parseDouble(line.substring(26,35).trim());
-                                        transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice, productName);
-                                        isValuemealQualifier = false;
-                                    }
+                                        isValuemeal = false;
                                     else
-                                    {
-                                        valSize = transactions.get(transNum-1).valuemealsList.size()-1;
-                                        prodSize = transactions.get(transNum-1).valuemealsList.get(valSize).productsList.size()-1;
-                                        transactions.get(transNum-1).valuemealsList.get(valSize).newProduct();
-                                        transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_id = productNum;
-                                        transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).mode = deleteStatus;
-                                        transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).count = productQuantity;
-                                        transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_name = productName;
-                                        isValuemealQualifier = true;
-                                    }
+                                        isValuemeal = true;
                                 }
                                 else if(line.charAt(46) == ',')
                                 {
                                     productNum = Integer.parseInt(line.substring(44,46));
                                     deleteStatus = Integer.parseInt(line.substring(47,48));
-                                    productQuantity = Integer.parseInt(line.substring(6,8).trim());
-                                    productName = line.substring(8,24).trim();
                                     if (line.charAt(55) == '0')
-                                    {
-                                        productPrice = Double.parseDouble(line.substring(26,35).trim());
-                                        transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice, productName);
-                                        isValuemealQualifier = false;
-                                    }
+                                        isValuemeal = false;
                                     else
-                                    {
-                                        valSize = transactions.get(transNum-1).valuemealsList.size()-1;
-                                        transactions.get(transNum-1).valuemealsList.get(valSize).newProduct();
-                                        prodSize = transactions.get(transNum-1).valuemealsList.get(valSize).productsList.size()-1;
-                                        transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_id = productNum;
-                                        transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).mode = deleteStatus;
-                                        transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).count = productQuantity;
-                                        transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_name = productName;
-                                        isValuemealQualifier = true;
-                                    }
+                                        isValuemeal = true;
                                 }
                                 else
                                 {
                                     productNum = Integer.parseInt(line.substring(44,47));
                                     deleteStatus = Integer.parseInt(line.substring(48,49));
-                                    productQuantity = Integer.parseInt(line.substring(6,8).trim());
-                                    productName = line.substring(8,24).trim();
                                     if (line.charAt(56) == '0')
-                                    {
-                                        productPrice = Double.parseDouble(line.substring(26,35).trim());
-                                        transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice, productName);
-                                        isValuemealQualifier = false;
-                                    }
+                                        isValuemeal = false;
                                     else
-                                    {
-                                        valSize = transactions.get(transNum-1).valuemealsList.size()-1;
-                                        transactions.get(transNum-1).valuemealsList.get(valSize).newProduct();
-                                        prodSize = transactions.get(transNum-1).valuemealsList.get(valSize).productsList.size()-1;
-                                        transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_id = productNum;
-                                        transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).mode = deleteStatus;
-                                        transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).count = productQuantity;
-                                        transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_name = productName;
-                                        isValuemealQualifier = true;
-                                    }
+                                        isValuemeal = true;
+                                }
+                                
+                                productQuantity = Integer.parseInt(line.substring(6,8).trim());
+                                productName = line.substring(8,24).trim();
+                                try
+                                {
+                                    productPrice = Double.parseDouble(line.substring(26,35).trim());
+                                }
+                                catch(Exception e)
+                                {
+                                    productPrice = 0.00;
+                                }
+                                if (deleteStatus==1)
+                                {
+                                    productQuantity = productQuantity * -1;
+                                    productPrice = productPrice * -1;
+                                    transactions.get(transNum-1).deleted_items = 1;
+                                }
+                                if (isValuemeal)
+                                {
+                                    valSize = transactions.get(transNum-1).valuemealsList.size()-1;
+                                    transactions.get(transNum-1).valuemealsList.get(valSize).newProduct();
+                                    prodSize = transactions.get(transNum-1).valuemealsList.get(valSize).productsList.size()-1;
+                                    transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_id = productNum;
+                                    transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).mode = deleteStatus;
+                                    transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).count = productQuantity;
+                                    transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_name = productName;
+                                }
+                                else
+                                {
+                                    transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice, productName);
                                 }
                             }
                             else if(line.charAt(61) == '0')
@@ -178,48 +163,54 @@ public class OkrFileReader {
                                 productQuantity = Integer.parseInt(line.substring(6,8).trim());
                                 productName = line.substring(8,24).trim();
                                 transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice, productName);   
-                                isValuemealQualifier = false;
+                                isValuemeal = false;
                             }
                             else
                                 {
                                     valSize = transactions.get(transNum-1).valuemealsList.size()-1;
                                     productNum = Character.getNumericValue(line.charAt(51));
                                     deleteStatus = Character.getNumericValue(line.charAt(53));
-                                    if(deleteStatus == 2)
-                                    {
-                                        deleteStatus = 3;
-                                    }
                                     productQuantity = Integer.parseInt(line.substring(6,8).trim());
                                     productName = line.substring(8,24).trim();
                                     
                                     transactions.get(transNum-1).valuemealsList.get(valSize).newProduct();
                                     prodSize = transactions.get(transNum-1).valuemealsList.get(valSize).productsList.size()-1;
+                                    if(deleteStatus == 2)
+                                    {
+                                        deleteStatus = 3;
+                                    }
+                                    if (deleteStatus==1)
+                                    {
+                                        productQuantity = productQuantity * -1;
+                                        transactions.get(transNum-1).deleted_items = 1;
+                                    }
                                     transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_id = productNum;
                                     transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).mode = deleteStatus;
                                     transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).count = productQuantity;
                                     transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_name = productName;
-                                    isValuemealQualifier = true;
+                                    isValuemeal = true;
                                 }
+//                            if(deleteStatus != 0)
+//                            {
+//                                System.exit(0);
+//                            }
                             break;
                         case "21":
+                            productPrice = Double.parseDouble(line.substring(26,35).trim());
+                            productQuantity = Integer.parseInt(line.substring(6,8).trim());
+                            productName = line.substring(8,24).trim();
                             if (line.charAt(43) == ',')
                             {
                                 if(line.charAt(45) == ',')
                                 {
                                     productNum = Integer.parseInt(line.substring(44,45));
                                     deleteStatus = Integer.parseInt(line.substring(46,47));
-                                    productQuantity = Integer.parseInt(line.substring(6,8).trim());
-                                    productName = line.substring(8,24).trim();
-                                    productPrice = Double.parseDouble(line.substring(26,35).trim());
                                     transactions.get(transNum-1).newValuemeal(productNum, deleteStatus, productQuantity, productPrice, productName);
                                 }
                                 else if(line.charAt(46) == ',')
                                 {
                                     productNum = Integer.parseInt(line.substring(44,46));
                                     deleteStatus = Integer.parseInt(line.substring(47,48));
-                                    productQuantity = Integer.parseInt(line.substring(6,8).trim());
-                                    productName = line.substring(8,24).trim();
-                                    productPrice = Double.parseDouble(line.substring(26,35).trim());
                                     transactions.get(transNum-1).newValuemeal(productNum, deleteStatus, productQuantity, productPrice, productName);
                                     
                                 }
@@ -227,9 +218,6 @@ public class OkrFileReader {
                                 {
                                     productNum = Integer.parseInt(line.substring(44,47));
                                     deleteStatus = Integer.parseInt(line.substring(48,49));
-                                    productQuantity = Integer.parseInt(line.substring(6,8).trim());
-                                    productName = line.substring(8,24).trim();
-                                    productPrice = Double.parseDouble(line.substring(26,35).trim());
                                     transactions.get(transNum-1).newValuemeal(productNum, deleteStatus, productQuantity, productPrice, productName);
                                 }
                             }
@@ -237,13 +225,10 @@ public class OkrFileReader {
                             {
                                 productNum = Character.getNumericValue(line.charAt(51));
                                 deleteStatus = Character.getNumericValue(line.charAt(53));
-                                productPrice = Double.parseDouble(line.substring(26,35).trim());
-                                productQuantity = Integer.parseInt(line.substring(6,8).trim());
-                                productName = line.substring(8,24).trim();
                                 transactions.get(transNum-1).newValuemeal(productNum, deleteStatus, productQuantity, productPrice, productName);
                                 transactions.get(transNum-1).valuemealsList.get(transactions.get(transNum-1).valuemealsList.size()-1).newProduct();
                             }
-                            isValuemealQualifier = true;
+                            isValuemeal = true;
                             break;
                         case "22":
                             try
@@ -276,23 +261,21 @@ public class OkrFileReader {
                             {
                                 productPrice = 0.00;
                             }
-                            if (isValuemealQualifier)
+                            if (isValuemeal)
                             {
                                 valSize = transactions.get(transNum-1).valuemealsList.size()-1;
                                 prodSize = transactions.get(transNum-1).valuemealsList.get(valSize).productsList.size()-1;
                                 transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).newQualifer(qualifierCount, modifierName, modifierId, qualifierId, productPrice);
                                 qualSize = transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).qualifiersList.size()-1;
-                                transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).isValuemealQualifier = isValuemealQualifier;
+                                transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).isValuemealQualifier = isValuemeal;
                             }
                             else
                             {
                                 prodSize = (transactions.get(transNum-1).productsList.size())-1;
                                 transactions.get(transNum-1).productsList.get(prodSize).newQualifer(qualifierCount, modifierName, modifierId, qualifierId, productPrice);
                                 qualSize = transactions.get(transNum-1).productsList.get(prodSize).qualifiersList.size()-1;
-                                transactions.get(transNum-1).productsList.get(prodSize).isValuemealQualifier = isValuemealQualifier;
+                                transactions.get(transNum-1).productsList.get(prodSize).isValuemealQualifier = isValuemeal;
                             }
-                                
-                            
                             break;
                         case "31":
                             deleteStatus = Character.getNumericValue(line.charAt(45));
@@ -374,7 +357,6 @@ public class OkrFileReader {
                                     transactions.get(transNum-1).order_sub_total = orderSubtotal;
                                     transactions.get(transNum-1).newTender(51, cancelStatus, String.valueOf(taxTotal));
                                     transactions.get(transNum-1).is_overring = 0;
-                                    transactions.get(transNum-1).deleted_items = 0;
                                     break;
                                 case 1: case 6: case 7:
                                     transactions.get(transNum-1).order_sub_total = 0.00;

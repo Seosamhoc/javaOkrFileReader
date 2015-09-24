@@ -48,10 +48,6 @@ public class Transaction {
         products = new Product();
         productsList.add(products);
         productsList.get(productsList.size()-1).product_id = productNum;
-        if(deleteStatus == 2)
-        {
-            deleteStatus = 3;
-        }
         productsList.get(productsList.size()-1).mode = deleteStatus;
         productsList.get(productsList.size()-1).count = productQuantity;
         productsList.get(productsList.size()-1).amount = productPrice;
@@ -108,13 +104,15 @@ public class Transaction {
         productPrice = productPrice/100;
         valuemeals = new Valuemeal();
         valuemealsList.add(valuemeals);
-        
+        if (deleteStatus==1)
+        {
+            productQuantity = productQuantity * -1;
+            productPrice = productPrice * -1;
+        }
         int valSize = valuemealsList.size()-1;
         valuemealsList.get(valSize).valuemeal_id = productNum;
         valuemealsList.get(valSize).valuemeal_name = productName;
         valuemealsList.get(valSize).count = productQuantity;
-        if (deleteStatus == 2)
-            deleteStatus = 3;
         valuemealsList.get(valSize).mode = deleteStatus;
         valuemealsList.get(valSize).amount = productPrice;
         
