@@ -100,13 +100,9 @@ public class Product {
             {
                 if (j > 0) jsonStringBuilder.append(',');
                 jsonStringBuilder.append(discountListItem.outputJSON());
+                j++;
             }
-            if(!(qualifiersList.isEmpty())){
-                jsonStringBuilder.append("],");
-            }
-            else{
-                jsonStringBuilder.append("]");
-            }
+            jsonStringBuilder.append("]");
         }
         if( !(qualifiersList.isEmpty()))
         {

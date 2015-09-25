@@ -48,8 +48,29 @@ public String DBAccess(String type, int menuNo, String returnColumn){
     {
       // if the error message is "out of memory", 
       // it probably means no database file is found
-      System.err.println("See DBAccess [line 51]");
-      System.err.println(e.getMessage());
+//      System.err.println("See DBAccess [line 51]");
+//      System.err.println(e.getMessage());
+      DBCreate newDB;
+      newDB = new DBCreate();
+      try
+        {
+    //        prodDBconn = DriverManager.getConnection("jdbc:sqlite:ProductDatabase.db");
+            Statement statement = prodDBconn.createStatement();
+            statement.setQueryTimeout(30);
+            queryText = "SELECT " + returnColumn + " FROM productsOKR WHERE type = '" + type + "' AND menuNo = " + menuNo;
+            ResultSet rs = statement.executeQuery(queryText);
+            while(rs.next())
+            {
+              // read the result set
+              returnValue = rs.getString(returnColumn);
+            }
+        }
+        catch(SQLException err)
+        {
+            System.err.println("See DBAccess [line 51]");
+            System.err.println(err.getMessage());
+            System.exit(0);
+        }
     }
     finally
     {
@@ -63,6 +84,7 @@ public String DBAccess(String type, int menuNo, String returnColumn){
         // connection close failed.
         System.err.println("See DBAccess [line 63]");
         System.err.println(e);
+        System.exit(0);
       }
     }
     return(returnValue);

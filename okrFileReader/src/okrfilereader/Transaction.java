@@ -131,6 +131,10 @@ public class Transaction {
             {
                 mainProdNum = 36;
             }
+            else if (productNum == 409) //there's a euroking deal for this valuemeal but not the item on it's own.
+            {
+                mainProdNum = 413;
+            }
             else
             {
                 mainProdNum = Integer.parseInt(productDB.DBAccess("menu/package", productNum, "menuNo", true));

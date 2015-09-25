@@ -20,7 +20,8 @@ public class OkrFileReader {
         
         //System.out.print(System.getProperty("user.home"));
         //String fileLocation = "C:\\Users\\blue16\\My Documents\\audit000.txt";
-        String fileLocation = System.getProperty("user.home") + "/Desktop/JSON project/audit000.txt";
+        String fileName = "audit000z";
+        String fileLocation = System.getProperty("user.home") + "/Desktop/JSON project/" + fileName + ".txt";
         
         File f = new File(fileLocation); 
         if (f.exists()) {
@@ -62,6 +63,7 @@ public class OkrFileReader {
             String changeAmount = "0.00";
             Double orderSubtotal;
             int lastProductIndex;
+            int lastValuemealIndex;
             int transNum = 0;
             int indexee =0;
             while ((line = in.readLine()) != null) {
@@ -102,12 +104,18 @@ public class OkrFileReader {
                         case "20":
                             if (line.charAt(43) == ',')
                             {
+                                
+                                productQuantity = Integer.parseInt(line.substring(4,8).trim());
+                                int productQuantityLength = line.substring(4,8).trim().length();
+                                
+//                                System.out.println(productQuantity + " : " + productQuantityLength);
+                                
                                 if(line.charAt(45) == ',')
                                 {
                                     productNum = Integer.parseInt(line.substring(44,45));
                                     deleteStatus = Integer.parseInt(line.substring(46,47));
                                     cancelStatus = Integer.parseInt(line.substring(48,49));
-                                    if(line.charAt(54) == '0')
+                                    if(line.charAt(53 + productQuantityLength) == '0')
                                         isValuemeal = false;
                                     else
                                         isValuemeal = true;
@@ -117,7 +125,7 @@ public class OkrFileReader {
                                     productNum = Integer.parseInt(line.substring(44,46));
                                     deleteStatus = Integer.parseInt(line.substring(47,48));
                                     cancelStatus = Integer.parseInt(line.substring(49,50));
-                                    if (line.charAt(55) == '0')
+                                    if (line.charAt(54 + productQuantityLength) == '0')
                                         isValuemeal = false;
                                     else
                                         isValuemeal = true;
@@ -127,13 +135,12 @@ public class OkrFileReader {
                                     productNum = Integer.parseInt(line.substring(44,47));
                                     deleteStatus = Integer.parseInt(line.substring(48,49));
                                     cancelStatus = Integer.parseInt(line.substring(50,51));
-                                    if (line.charAt(56) == '0')
+                                    if (line.charAt(55 + productQuantityLength) == '0')
                                         isValuemeal = false;
                                     else
                                         isValuemeal = true;
                                 }
                                 
-                                productQuantity = Integer.parseInt(line.substring(6,8).trim());
                                 productName = line.substring(8,24).trim();
                                 try
                                 {
@@ -170,7 +177,7 @@ public class OkrFileReader {
                                 productNum = Character.getNumericValue(line.charAt(51));
                                 deleteStatus = Character.getNumericValue(line.charAt(53));
                                 productPrice = Double.parseDouble(line.substring(25,35).trim());
-                                productQuantity = Integer.parseInt(line.substring(6,8).trim());
+                                productQuantity = Integer.parseInt(line.substring(4,8).trim());
                                 productName = line.substring(8,24).trim();
                                 transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice, productName);   
                                 isValuemeal = false;
@@ -180,7 +187,7 @@ public class OkrFileReader {
                                     valSize = transactions.get(transNum-1).valuemealsList.size()-1;
                                     productNum = Character.getNumericValue(line.charAt(51));
                                     deleteStatus = Character.getNumericValue(line.charAt(53));
-                                    productQuantity = Integer.parseInt(line.substring(6,8).trim());
+                                    productQuantity = Integer.parseInt(line.substring(4,8).trim());
                                     productName = line.substring(8,24).trim();
                                     
                                     transactions.get(transNum-1).valuemealsList.get(valSize).newProduct();
@@ -203,7 +210,7 @@ public class OkrFileReader {
                             break;
                         case "21":
                             productPrice = Double.parseDouble(line.substring(25,35).trim());
-                            productQuantity = Integer.parseInt(line.substring(6,8).trim());
+                            productQuantity = Integer.parseInt(line.substring(4,8).trim());
                             productName = line.substring(8,24).trim();
                             if (line.charAt(43) == ',')
                             {
@@ -290,9 +297,18 @@ public class OkrFileReader {
                             else
                                 discountId = Integer.parseInt(line.substring(44,47));
                             
-                            thirdPartyId = "883398957725";
-                            lastProductIndex = transactions.get(transNum-1).productsList.size()-1;
-                            transactions.get(transNum-1).productsList.get(lastProductIndex).newDiscount(discountName, discountId, deleteStatus, discountValue, thirdPartyId);
+                            
+                            thirdPartyId = "883398957725"; //Coupon offer savings is applied across one item
+                            if (isValuemeal){
+                                lastValuemealIndex = transactions.get(transNum-1).valuemealsList.size()-1;
+                                lastProductIndex = transactions.get(transNum-1).valuemealsList.get(lastValuemealIndex).productsList.size()-1;
+                                transactions.get(transNum-1).valuemealsList.get(lastValuemealIndex).productsList.get(lastProductIndex).newDiscount(discountName, discountId, deleteStatus, discountValue, thirdPartyId);
+                            }
+                            else
+                            {
+                                lastProductIndex = transactions.get(transNum-1).productsList.size()-1;
+                                transactions.get(transNum-1).productsList.get(lastProductIndex).newDiscount(discountName, discountId, deleteStatus, discountValue, thirdPartyId);
+                            }
                             break;
                         case "31":
                             deleteStatus = Character.getNumericValue(line.charAt(45));
@@ -452,15 +468,23 @@ public class OkrFileReader {
             jsonStringBuilder.append("]" );
             jsonStringBuilder.append("}" );
             jsonStringBuilder.append("}\n");
-            
+            String jsonString = jsonStringBuilder.toString();
             long endTime = System.currentTimeMillis();
 
 //            System.out.println("That took " + (endTime - startTime) + " milliseconds");
-            System.out.print(jsonStringBuilder);
+//            System.out.print(jsonStringBuilder);
             in.close();
+            try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+            new FileOutputStream(fileName + ".json"), "utf-8"))) {
+                writer.write(jsonString);
+            }
+            catch (IOException e) {
+                System.out.print("File output error");
+            }
         } 
         catch (IOException e) {
             System.out.print("File input error");
         }
+        
     }
 }
