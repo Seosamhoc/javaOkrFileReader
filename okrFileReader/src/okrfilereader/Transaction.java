@@ -28,7 +28,7 @@ public class Transaction {
     int discountSize;
     boolean skipTransaction = false;
     
-    public void newDiscount(String discountName, int discountNum, int deleteStatus, double discountValue, int thirdPartyId)
+    public void newDiscount(String discountName, int discountNum, int deleteStatus, double discountValue, String thirdPartyId)
     {
         discountValue = (double)Math.round(discountValue * 89.65);
         discountValue = discountValue/100;

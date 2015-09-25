@@ -22,7 +22,23 @@ public class Product {
     ArrayList<Qualifier> qualifiersList = new ArrayList();
     Boolean isValuemealQualifier;
     int qualifierSize;
-    Discount product_discounts;
+    int discountSize;
+    ArrayList<Discount> discountsList = new ArrayList();
+    Discount discounts;
+    
+    public void newDiscount(String discountName, int discountNum, int deleteStatus, double discountValue, String thirdPartyId)
+    {
+        discountValue = (double)Math.round(discountValue * 89.65);
+        discountValue = discountValue/100;
+        discounts = new Discount();
+        discountsList.add(discounts);
+        discountSize = discountsList.size()-1;
+        discountsList.get(discountSize).discount_id = discountNum;
+        discountsList.get(discountSize).discount_name = discountName;
+        discountsList.get(discountSize).amount = discountValue;
+        discountsList.get(discountSize).count = 1;
+        discountsList.get(discountSize).third_party_id = thirdPartyId;
+    }
     
     public void newQualifer(int qualifierCount, String modifierName, int modifierId, int qualifierId, double productPrice){
         productPrice = (double)Math.round(productPrice * 89.65);
@@ -75,6 +91,23 @@ public class Product {
         jsonStringBuilder.append("\"price\":\"").append(price).append("\",");
         jsonStringBuilder.append("\"a_la_carte_price\":\"").append(a_la_carte_price).append("\",");
         jsonStringBuilder.append("\"mode\":\"").append(mode).append("\"");
+        int j;
+        if(!(discountsList.isEmpty()))
+        {
+            jsonStringBuilder.append(",\"product_discounts\":[");
+            j =0;
+            for (Discount discountListItem : discountsList)
+            {
+                if (j > 0) jsonStringBuilder.append(',');
+                jsonStringBuilder.append(discountListItem.outputJSON());
+            }
+            if(!(qualifiersList.isEmpty())){
+                jsonStringBuilder.append("],");
+            }
+            else{
+                jsonStringBuilder.append("]");
+            }
+        }
         if( !(qualifiersList.isEmpty()))
         {
             if (isValuemealQualifier)
@@ -85,7 +118,7 @@ public class Product {
             {
                 jsonStringBuilder.append(",\"product_qualifiers\":[");
             }
-            int j =0;
+            j =0;
             for (Qualifier qualifiersListItem : qualifiersList) {
                 if (j > 0) jsonStringBuilder.append(',');
                 jsonStringBuilder.append(qualifiersListItem.outputJSON());

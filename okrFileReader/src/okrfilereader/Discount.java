@@ -6,7 +6,7 @@ package okrfilereader;
  */
 public class Discount {
     int discount_id;
-    int third_party_id;
+    String third_party_id;
     int discount_reference_uid;
     String discount_name;
     int count;
