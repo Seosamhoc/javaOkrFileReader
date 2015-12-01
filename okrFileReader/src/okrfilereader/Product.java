@@ -19,17 +19,19 @@ public class Product {
     String a_la_carte_price;
     int mode;
     Qualifier qualifiers;
-    ArrayList<Qualifier> qualifiersList = new ArrayList();
+    ArrayList<Qualifier> qualifiersList = new ArrayList<>();
     Boolean isValuemealQualifier;
     int qualifierSize;
     int discountSize;
-    ArrayList<Discount> discountsList = new ArrayList();
+    ArrayList<Discount> discountsList = new ArrayList<>();
     Discount discounts;
+    Boolean hasDiscount = false;
+    int is_overring =0;
     
     public void newDiscount(String discountName, int discountNum, int deleteStatus, double discountValue, String thirdPartyId)
     {
-        discountValue = (double)Math.round(discountValue * 89.65);
-        discountValue = discountValue/100;
+        discountValue = (double)Math.round(discountValue*10000/110.35);//price in rounded to nearest cent and tax taken from it.
+        discountValue = discountValue/100;//price back to euro
         discounts = new Discount();
         discountsList.add(discounts);
         discountSize = discountsList.size()-1;
@@ -37,13 +39,15 @@ public class Product {
         discountsList.get(discountSize).discount_name = discountName;
         discountsList.get(discountSize).amount = discountValue;
         discountsList.get(discountSize).count = 1;
+        discountsList.get(discountSize).mode = deleteStatus;
         discountsList.get(discountSize).third_party_id = thirdPartyId;
     }
     
-    public void newQualifer(int qualifierCount, String modifierName, int modifierId, int qualifierId, double productPrice){
-        productPrice = (double)Math.round(productPrice * 89.65);
-        productPrice = productPrice/100;
+    public void newQualifer(int qualifierCount, String modifierName, int modifierId, int qualifierId, double productPrice, int deleteStatus, String restaurantNum){
+        productPrice = (double)Math.round(productPrice*100/1.1035);//price in rounded to nearest cent and tax taken from it.
+        productPrice = productPrice/100;//price back to euro
         qualifiers = new Qualifier();
+        qualifiers.mode = deleteStatus;
         qualifiers.count = qualifierCount;
         qualifiers.modifier_name = modifierName;
         qualifiers.modifier_id = modifierId;
@@ -61,24 +65,34 @@ public class Product {
         DBAccess qualifierDB;
         qualifierDB = new DBAccess();
         qualifiers.a_la_carte_price = qualifiers.price;
-        qualifiers.qualifier_name = qualifierDB.DBAccess("ingredient", qualifierId, "products").trim();
+        qualifiers.qualifier_name = qualifierDB.DBAccess("ingredient", qualifierId, "products", restaurantNum).trim();
         try{
-            qualifiers.qualifier_third_party_id = Integer.parseInt(qualifierDB.DBAccess("ingredient", qualifierId, "bkpnNo"));
+            qualifiers.qualifier_third_party_id = Integer.parseInt(qualifierDB.DBAccess("ingredient", qualifierId, "bkpnNo", restaurantNum));
         }
         catch(Exception e)
         {
-            qualifiers.qualifier_third_party_id = -1;
+            qualifiers.qualifier_third_party_id = 7414;
         }
         qualifiersList.add(qualifiers);
     }
     
-    public String outputJSON(){
+    public String outputJSON(String restaurantNum){
         DBAccess productDB;
         productDB = new DBAccess();
-        product_name = productDB.DBAccess("menu/package", product_id, "products");
-        third_party_id = productDB.DBAccess("menu/package", product_id, "bkpnNo");
-        centPrice = Double.parseDouble(productDB.DBAccess("menu/package", product_id, "price"));
-        centPrice = (double)Math.round(centPrice *0.8965);
+        product_name = productDB.DBAccess("menu/package", product_id, "products", restaurantNum);
+        third_party_id = productDB.DBAccess("menu/package", product_id, "bkpnNo", restaurantNum);
+        if(third_party_id.equals("")){
+            third_party_id = "7414"; //this is the code for food items. 
+            //Non-food items will need to be in the database
+        }
+        try{
+            centPrice = Double.parseDouble(productDB.DBAccess("menu/package", product_id, "price", restaurantNum));
+        }
+        catch(Exception e)
+        {
+            System.out.println("Price not found for " + product_id);
+        }
+        centPrice = (double)Math.round(centPrice*100/110.35);
         centPrice = centPrice/100;
         a_la_carte_price = String.valueOf(centPrice);
         StringBuilder jsonStringBuilder = new StringBuilder();
@@ -96,10 +110,15 @@ public class Product {
         {
             jsonStringBuilder.append(",\"product_discounts\":[");
             j =0;
-            for (Discount discountListItem : discountsList)
+            for (Discount discountsListItem : discountsList)
             {
+                if (is_overring == 1)
+                {
+                    discountsListItem.count = discountsListItem.count * -1;
+                    discountsListItem.amount = discountsListItem.amount * -1;
+                }
                 if (j > 0) jsonStringBuilder.append(',');
-                jsonStringBuilder.append(discountListItem.outputJSON());
+                jsonStringBuilder.append(discountsListItem.outputJSON());
                 j++;
             }
             jsonStringBuilder.append("]");
@@ -116,6 +135,11 @@ public class Product {
             }
             j =0;
             for (Qualifier qualifiersListItem : qualifiersList) {
+                if (is_overring == 1)
+                {
+                    qualifiersListItem.count = qualifiersListItem.count * -1;
+                    qualifiersListItem.amount = qualifiersListItem.amount * -1;
+                }
                 if (j > 0) jsonStringBuilder.append(',');
                 jsonStringBuilder.append(qualifiersListItem.outputJSON());
                 j++;

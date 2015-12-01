@@ -16,13 +16,13 @@ public class Transaction {
     Double order_sub_total;
     int is_overring;
     int deleted_items;
-    ArrayList<Discount> discountsList = new ArrayList();
+    ArrayList<Discount> discountsList = new ArrayList<>();
     Discount discounts;
-    ArrayList<Product> productsList = new ArrayList();
+    ArrayList<Product> productsList = new ArrayList<>();
     Product products;
-    ArrayList<Valuemeal> valuemealsList = new ArrayList();
+    ArrayList<Valuemeal> valuemealsList = new ArrayList<>();
     Valuemeal valuemeals;
-    ArrayList<Tender> tendersList = new ArrayList();
+    ArrayList<Tender> tendersList = new ArrayList<>();
     Tender tenders;
     int lastTenderIndex;
     int discountSize;
@@ -30,21 +30,68 @@ public class Transaction {
     
     public void newDiscount(String discountName, int discountNum, int deleteStatus, double discountValue, String thirdPartyId)
     {
-        discountValue = (double)Math.round(discountValue * 89.65);
-        discountValue = discountValue/100;
-        discounts = new Discount();
-        discountsList.add(discounts);
-        discountSize = discountsList.size()-1;
-        discountsList.get(discountSize).discount_id = discountNum;
-        discountsList.get(discountSize).discount_name = discountName;
-        discountsList.get(discountSize).amount = discountValue;
-        discountsList.get(discountSize).count = 1;
-        discountsList.get(discountSize).third_party_id = thirdPartyId;
+        if(deleteStatus>0)
+            deleteStatus = 1;
+        DBCoupon couponDB;
+        couponDB = new DBCoupon();
+        Boolean multiDiscount = couponDB.DBCoupon(discountNum);
+        if(multiDiscount){
+            discountValue = (double)Math.round(discountValue *10000/110.35);
+            discountValue = discountValue/100;
+            discounts = new Discount();
+            discountsList.add(discounts);
+            discountSize = discountsList.size()-1;
+            discountsList.get(discountSize).discount_id = discountNum;
+            discountsList.get(discountSize).discount_name = discountName;
+            discountsList.get(discountSize).amount = discountValue;
+            discountsList.get(discountSize).count = 1;
+            discountsList.get(discountSize).mode = deleteStatus;
+            discountsList.get(discountSize).third_party_id = thirdPartyId;
+            
+        }
+        else{
+            ArrayList<Integer> DBProdNum = couponDB.DBProdNum(discountNum);
+            productloop:
+            {
+                for (Product productsListItem : productsList) {
+                    for(Integer couponProductId : DBProdNum){
+                        if(productsListItem.product_id == couponProductId && !productsListItem.hasDiscount){
+                            productsListItem.newDiscount(discountName, discountNum, deleteStatus, discountValue, thirdPartyId);
+                            if (deleteStatus == 0)
+                                productsListItem.hasDiscount = true;
+                            break productloop;
+                        }
+                    }
+                }
+                discountValue = (double)Math.round(discountValue *10000/110.35);
+                discountValue = discountValue/100;
+                discounts = new Discount();
+                discountsList.add(discounts);
+                discountSize = discountsList.size()-1;
+                discountsList.get(discountSize).discount_id = discountNum;
+                discountsList.get(discountSize).discount_name = discountName;
+                discountsList.get(discountSize).amount = discountValue;
+                discountsList.get(discountSize).count = 1;
+                discountsList.get(discountSize).mode = deleteStatus;
+                discountsList.get(discountSize).third_party_id = thirdPartyId;
+            }
+            valuemealloop:
+            for (Valuemeal valuemealsListItem : valuemealsList) {
+                for(Integer couponProductId : DBProdNum){
+                    if(valuemealsListItem.valuemeal_id == couponProductId && !valuemealsListItem.hasDiscount){
+                        valuemealsListItem.newDiscount(discountName, discountNum, deleteStatus, discountValue, thirdPartyId);
+                        if (deleteStatus == 0)
+                            valuemealsListItem.hasDiscount = true;
+                        break valuemealloop;
+                    }
+                }
+            }
+        }
     }
     
     public void newProduct(int productNum, int deleteStatus, int productQuantity, double productPrice, String productName)
     {
-        productPrice = (double)Math.round(productPrice * 89.65);
+        productPrice = (double)Math.round(productPrice *10000/110.35);
         productPrice = productPrice/100;
         products = new Product();
         productsList.add(products);
@@ -62,8 +109,10 @@ public class Transaction {
         tendersList.add(tenders);
         lastTenderIndex = tendersList.size()-1;
         switch(tenderType)
-        {
-            case 40: case 45:
+        {   case 45:
+                tendersList.get(lastTenderIndex).is_change = "true"; 
+                //no break here on purpose, 45 is otherwise the same as 40
+            case 40: 
                 tendersList.get(lastTenderIndex).tender_id = 12345678; //need to get this from OKR
                 tendersList.get(lastTenderIndex).third_party_id = 7765;
                 tendersList.get(lastTenderIndex).tender_name = "CASH";
@@ -91,17 +140,19 @@ public class Transaction {
                 tendersList.get(lastTenderIndex).mode = 1;
                 break;
             case 2: case 3: case 4: case 5:
-                if( tenderedAmount.charAt(0) != '-')
-                tendersList.get(lastTenderIndex).amount = Double.parseDouble("-" + tenderedAmount);
+                if( tenderedAmount.charAt(0) != '-' && tenderType != 45)
+                    tendersList.get(lastTenderIndex).amount = Double.parseDouble("-" + tenderedAmount);
+                else if(tenderType == 45)
+                    tendersList.get(lastTenderIndex).amount = Double.parseDouble(tenderedAmount) * -1;
                 tendersList.get(lastTenderIndex).mode = 3;
                 break;
         }
         tendersList.get(lastTenderIndex).count = 1;
     }
     
-    public void newValuemeal(int productNum, int deleteStatus, int productQuantity, double productPrice, String productName)
+    public void newValuemeal(int productNum, int deleteStatus, int productQuantity, double productPrice, String productName, String restaurantNum)
     {
-        productPrice = (double)Math.round(productPrice * 89.65);
+        productPrice = (double)Math.round(productPrice *10000/110.35);
         productPrice = productPrice/100;
         valuemeals = new Valuemeal();
         valuemealsList.add(valuemeals);
@@ -137,9 +188,9 @@ public class Transaction {
             }
             else
             {
-                mainProdNum = Integer.parseInt(productDB.DBAccess("menu/package", productNum, "menuNo", true));
+                mainProdNum = Integer.parseInt(productDB.DBAccess("menu/package", productNum, "menuNo", restaurantNum, true));
             }
-            mainProdName = productDB.DBAccess("menu/package", mainProdNum, "products");
+            mainProdName = productDB.DBAccess("menu/package", mainProdNum, "products", restaurantNum);
             valuemealsList.get(valSize).productsList.get(prodSize).product_id = mainProdNum;
             valuemealsList.get(valSize).productsList.get(prodSize).product_name = mainProdName;
         }
@@ -151,7 +202,7 @@ public class Transaction {
         }
     }
     
-    public String outputJSON(){
+    public String outputJSON(String restaurantNum){
         StringBuilder jsonStringBuilder = new StringBuilder();
         jsonStringBuilder.append("{");
         jsonStringBuilder.append("\"sale_id\"" + ":\"").append(sale_id).append("\",");
@@ -167,8 +218,14 @@ public class Transaction {
         if(!(productsList.isEmpty())){
             jsonStringBuilder.append("\"products\": [");
             for (Product productsListItem : productsList) {
+                if (is_overring == 1)
+                {
+                    productsListItem.count = productsListItem.count * -1;
+                    productsListItem.amount = productsListItem.amount * -1;
+                    productsListItem.is_overring = 1;
+                }
                 if (j > 0) jsonStringBuilder.append(',');
-                jsonStringBuilder.append(productsListItem.outputJSON());
+                jsonStringBuilder.append(productsListItem.outputJSON(restaurantNum));
                 j++;
             }
             if(!(discountsList.isEmpty()) || !(valuemealsList.isEmpty()) || !(tendersList.isEmpty())){
@@ -183,7 +240,13 @@ public class Transaction {
             jsonStringBuilder.append("\"valuemeals\":[");
             for (Valuemeal valuemealsListItem : valuemealsList) {
                 if (j > 0) jsonStringBuilder.append(',');
-                jsonStringBuilder.append(valuemealsListItem.outputJSON());
+                if (is_overring == 1)
+                {
+                    valuemealsListItem.count = valuemealsListItem.count * -1;
+                    valuemealsListItem.amount = valuemealsListItem.amount * -1;
+                    valuemealsListItem.is_overring = 1;
+                }
+                jsonStringBuilder.append(valuemealsListItem.outputJSON(restaurantNum));
                 j++;
             }
             if(!(discountsList.isEmpty()) || !(tendersList.isEmpty())){
@@ -199,6 +262,11 @@ public class Transaction {
         
             for (Discount discountsListItem : discountsList) {
                 if (j > 0) jsonStringBuilder.append(',');
+                if (is_overring == 1)
+                {
+                    discountsListItem.count = discountsListItem.count * -1;
+                    discountsListItem.amount = discountsListItem.amount * -1;
+                }
                 jsonStringBuilder.append(discountsListItem.outputJSON());
                 j++;
             }

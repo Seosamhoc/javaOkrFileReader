@@ -1,6 +1,7 @@
 package okrfilereader;
 import java.io.*;
 import java.util.*;
+import java.text.SimpleDateFormat;
 /**
  *
  * @author seosamh
@@ -11,30 +12,42 @@ public class OkrFileReader {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
-        OkrFileReader thisProgram;
-        thisProgram = new OkrFileReader();
-        
+        for (String arg : args) {
+            System.out.println("args: ".concat(arg));
+            OkrFileReader thisProgram = new OkrFileReader(arg);
+        }
+//        OkrFileReader thisProgram = new OkrFileReader("audit000");
     }
-    public OkrFileReader(){
-        
-        //System.out.print(System.getProperty("user.home"));
-        //String fileLocation = "C:\\Users\\blue16\\My Documents\\audit000.txt";
-        String fileName = "audit000z";
-        String fileLocation = System.getProperty("user.home") + "/Desktop/JSON project/" + fileName + ".txt";
-        
-        File f = new File(fileLocation); 
-        if (f.exists()) {
-            //System.out.println("File exists");
-        } else {
-            System.out.print("File does not exist");
+    public OkrFileReader(String restaurantNum){
+        String fileName = "audit000";
+        SimpleDateFormat folderNameFormat = new SimpleDateFormat("ddMMYYYY");
+        String dateFolder = folderNameFormat.format(System.currentTimeMillis()-86400000);
+        String filePath = new File("").getAbsolutePath();
+        String fileLocation;
+        fileLocation = filePath.concat(System.getProperty("file.separator"))
+                               .concat(restaurantNum)
+                               .concat(System.getProperty("file.separator"))
+                               .concat(dateFolder)
+                               .concat(System.getProperty("file.separator"));
+        String inputFileLocation = fileLocation.concat(fileName).concat(".txt");
+//        String fileLocation = System.getProperty("user.home") + "/Desktop/JSON project/" + fileName + ".txt";
+        try{
+            UpdateDatabase databaseupdater = new UpdateDatabase(fileLocation, restaurantNum);
+        }
+        catch(Exception e){
+            System.out.println("Attempted to create database");
+        }
+        System.out.println(inputFileLocation);
+        File f = new File(inputFileLocation); 
+        if (!f.exists()) {
+            System.out.print("- File does not exist. ");
         }
         try {
-            FileInputStream fStream = new FileInputStream(fileLocation);
+            FileInputStream fStream = new FileInputStream(inputFileLocation);
             BufferedReader in = new BufferedReader(new InputStreamReader(fStream));
             String line = null;
             String code;
-            ArrayList<Transaction> transactions = new ArrayList();
+            ArrayList<Transaction> transactions = new ArrayList<>();
             Transaction trans;
             String orderDate;
             String orderTime;
@@ -73,6 +86,10 @@ public class OkrFileReader {
                         case "01":
                             trans = new Transaction();
                             transactions.add(transNum,trans);
+                            if (transNum ==0)
+                            {
+                                restaurantNum = line.substring(15,26).trim();
+                            }
                             transNum++;
                             break;
                         case "02":
@@ -104,42 +121,30 @@ public class OkrFileReader {
                         case "20":
                             if (line.charAt(43) == ',')
                             {
-                                
                                 productQuantity = Integer.parseInt(line.substring(4,8).trim());
                                 int productQuantityLength = line.substring(4,8).trim().length();
-                                
-//                                System.out.println(productQuantity + " : " + productQuantityLength);
-                                
                                 if(line.charAt(45) == ',')
                                 {
                                     productNum = Integer.parseInt(line.substring(44,45));
                                     deleteStatus = Integer.parseInt(line.substring(46,47));
                                     cancelStatus = Integer.parseInt(line.substring(48,49));
-                                    if(line.charAt(53 + productQuantityLength) == '0')
-                                        isValuemeal = false;
-                                    else
-                                        isValuemeal = true;
                                 }
                                 else if(line.charAt(46) == ',')
                                 {
                                     productNum = Integer.parseInt(line.substring(44,46));
                                     deleteStatus = Integer.parseInt(line.substring(47,48));
                                     cancelStatus = Integer.parseInt(line.substring(49,50));
-                                    if (line.charAt(54 + productQuantityLength) == '0')
-                                        isValuemeal = false;
-                                    else
-                                        isValuemeal = true;
                                 }
                                 else
                                 {
                                     productNum = Integer.parseInt(line.substring(44,47));
                                     deleteStatus = Integer.parseInt(line.substring(48,49));
                                     cancelStatus = Integer.parseInt(line.substring(50,51));
-                                    if (line.charAt(55 + productQuantityLength) == '0')
-                                        isValuemeal = false;
-                                    else
-                                        isValuemeal = true;
                                 }
+                                if(line.charAt(line.length()-6) == '0')
+                                    isValuemeal = false;
+                                else
+                                    isValuemeal = true;
                                 
                                 productName = line.substring(8,24).trim();
                                 try
@@ -150,20 +155,25 @@ public class OkrFileReader {
                                 {
                                     productPrice = 0.00;
                                 }
-                                if (deleteStatus==1 || cancelStatus > 0)
+                                if (deleteStatus>=1)
                                 {
                                     productQuantity = productQuantity * -1;
                                     productPrice = productPrice * -1;
                                 }
-                                if (deleteStatus==1) transactions.get(transNum-1).deleted_items = 1;
+                                if (deleteStatus>=1) transactions.get(transNum-1).deleted_items = 1;
                                 
                                 if (isValuemeal)
                                 {
+                                    
+                                    productPrice = (double)Math.round(productPrice *10000/110.35);
+                                    productPrice = productPrice/100;
                                     valSize = transactions.get(transNum-1).valuemealsList.size()-1;
                                     transactions.get(transNum-1).valuemealsList.get(valSize).newProduct();
                                     prodSize = transactions.get(transNum-1).valuemealsList.get(valSize).productsList.size()-1;
                                     transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_id = productNum;
                                     transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).mode = deleteStatus;
+                                    transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).amount = productPrice;
+                                    transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).price = productPrice;
                                     transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).count = productQuantity;
                                     transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_name = productName;
                                 }
@@ -179,34 +189,39 @@ public class OkrFileReader {
                                 productPrice = Double.parseDouble(line.substring(25,35).trim());
                                 productQuantity = Integer.parseInt(line.substring(4,8).trim());
                                 productName = line.substring(8,24).trim();
+                                if (deleteStatus==1)
+                                {
+                                    productQuantity = productQuantity * -1;
+                                    productPrice = productPrice * -1;
+                                    transactions.get(transNum-1).deleted_items = 1;
+                                }
                                 transactions.get(transNum-1).newProduct(productNum, deleteStatus, productQuantity, productPrice, productName);   
                                 isValuemeal = false;
                             }
                             else
+                            {
+                                valSize = transactions.get(transNum-1).valuemealsList.size()-1;
+                                productNum = Character.getNumericValue(line.charAt(51));
+                                deleteStatus = Character.getNumericValue(line.charAt(53));
+                                productQuantity = Integer.parseInt(line.substring(4,8).trim());
+                                productName = line.substring(8,24).trim();
+                                transactions.get(transNum-1).valuemealsList.get(valSize).newProduct();
+                                prodSize = transactions.get(transNum-1).valuemealsList.get(valSize).productsList.size()-1;
+                                if(deleteStatus == 2)
                                 {
-                                    valSize = transactions.get(transNum-1).valuemealsList.size()-1;
-                                    productNum = Character.getNumericValue(line.charAt(51));
-                                    deleteStatus = Character.getNumericValue(line.charAt(53));
-                                    productQuantity = Integer.parseInt(line.substring(4,8).trim());
-                                    productName = line.substring(8,24).trim();
-                                    
-                                    transactions.get(transNum-1).valuemealsList.get(valSize).newProduct();
-                                    prodSize = transactions.get(transNum-1).valuemealsList.get(valSize).productsList.size()-1;
-                                    if(deleteStatus == 2)
-                                    {
-                                        deleteStatus = 3;
-                                    }
-                                    if (deleteStatus==1)
-                                    {
-                                        productQuantity = productQuantity * -1;
-                                        transactions.get(transNum-1).deleted_items = 1;
-                                    }
-                                    transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_id = productNum;
-                                    transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).mode = deleteStatus;
-                                    transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).count = productQuantity;
-                                    transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_name = productName;
-                                    isValuemeal = true;
+                                    deleteStatus = 3;
                                 }
+                                if (deleteStatus==1)
+                                {
+                                    productQuantity = productQuantity * -1;
+                                    transactions.get(transNum-1).deleted_items = 1;
+                                }
+                                transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_id = productNum;
+                                transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).mode = deleteStatus;
+                                transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).count = productQuantity;
+                                transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).product_name = productName;
+                                isValuemeal = true;
+                            }
                             break;
                         case "21":
                             productPrice = Double.parseDouble(line.substring(25,35).trim());
@@ -218,27 +233,27 @@ public class OkrFileReader {
                                 {
                                     productNum = Integer.parseInt(line.substring(44,45));
                                     deleteStatus = Integer.parseInt(line.substring(46,47));
-                                    transactions.get(transNum-1).newValuemeal(productNum, deleteStatus, productQuantity, productPrice, productName);
+                                    transactions.get(transNum-1).newValuemeal(productNum, deleteStatus, productQuantity, productPrice, productName, restaurantNum);
                                 }
                                 else if(line.charAt(46) == ',')
                                 {
                                     productNum = Integer.parseInt(line.substring(44,46));
                                     deleteStatus = Integer.parseInt(line.substring(47,48));
-                                    transactions.get(transNum-1).newValuemeal(productNum, deleteStatus, productQuantity, productPrice, productName);
+                                    transactions.get(transNum-1).newValuemeal(productNum, deleteStatus, productQuantity, productPrice, productName, restaurantNum);
                                     
                                 }
                                 else
                                 {
                                     productNum = Integer.parseInt(line.substring(44,47));
                                     deleteStatus = Integer.parseInt(line.substring(48,49));
-                                    transactions.get(transNum-1).newValuemeal(productNum, deleteStatus, productQuantity, productPrice, productName);
+                                    transactions.get(transNum-1).newValuemeal(productNum, deleteStatus, productQuantity, productPrice, productName,restaurantNum);
                                 }
                             }
                             else
                             {
                                 productNum = Character.getNumericValue(line.charAt(51));
                                 deleteStatus = Character.getNumericValue(line.charAt(53));
-                                transactions.get(transNum-1).newValuemeal(productNum, deleteStatus, productQuantity, productPrice, productName);
+                                transactions.get(transNum-1).newValuemeal(productNum, deleteStatus, productQuantity, productPrice, productName, restaurantNum);
                                 transactions.get(transNum-1).valuemealsList.get(transactions.get(transNum-1).valuemealsList.size()-1).newProduct();
                             }
                             isValuemeal = true;
@@ -256,13 +271,18 @@ public class OkrFileReader {
                             modIdPosition = line.length()-2;
                             modifierId = Character.getNumericValue(line.charAt(modIdPosition));
                             
-                            if (line.charAt(45)==',')
+                            if (line.charAt(45)==','){
                                 qualifierId = Character.getNumericValue(line.charAt(44));
-                            else if (line.charAt(46)==',')
-                                qualifierId = Integer.parseInt(line.substring(44, 45));
-                            else
+                                deleteStatus = Character.getNumericValue(line.charAt(46));
+                            }
+                            else if (line.charAt(46)==','){
                                 qualifierId = Integer.parseInt(line.substring(44, 46));
-                            
+                                deleteStatus = Character.getNumericValue(line.charAt(47));
+                            }
+                            else{
+                                qualifierId = Integer.parseInt(line.substring(44, 47));
+                                deleteStatus = Character.getNumericValue(line.charAt(48));
+                            }
                             try{
                                 productPrice = Double.parseDouble(line.substring(25,35).trim());
                             }
@@ -270,44 +290,54 @@ public class OkrFileReader {
                             {
                                 productPrice = 0.00;
                             }
+                            if(deleteStatus != 0){
+                                qualifierCount = qualifierCount * -1;
+                                productPrice = productPrice * -1;
+                            }
+                            
                             if (isValuemeal)
                             {
                                 valSize = transactions.get(transNum-1).valuemealsList.size()-1;
                                 prodSize = transactions.get(transNum-1).valuemealsList.get(valSize).productsList.size()-1;
-                                transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).newQualifer(qualifierCount, modifierName, modifierId, qualifierId, productPrice);
+                                transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).newQualifer(qualifierCount, modifierName, modifierId, qualifierId, productPrice, deleteStatus, restaurantNum);
                                 qualSize = transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).qualifiersList.size()-1;
                                 transactions.get(transNum-1).valuemealsList.get(valSize).productsList.get(prodSize).isValuemealQualifier = isValuemeal;
                             }
                             else
                             {
                                 prodSize = (transactions.get(transNum-1).productsList.size())-1;
-                                transactions.get(transNum-1).productsList.get(prodSize).newQualifer(qualifierCount, modifierName, modifierId, qualifierId, productPrice);
+                                transactions.get(transNum-1).productsList.get(prodSize).newQualifer(qualifierCount, modifierName, modifierId, qualifierId, productPrice, deleteStatus, restaurantNum);
                                 qualSize = transactions.get(transNum-1).productsList.get(prodSize).qualifiersList.size()-1;
                                 transactions.get(transNum-1).productsList.get(prodSize).isValuemealQualifier = isValuemeal;
                             }
                             break;
                         case "30":
-                            deleteStatus = Character.getNumericValue(line.charAt(49));
                             discountValue = Double.parseDouble(line.substring(25,35).trim());
                             discountName = line.substring(8,24).trim();
                             if (line.charAt(45)==',')
+                            {
                                 discountId = Character.getNumericValue(line.charAt(44));
+                                deleteStatus = Character.getNumericValue(line.charAt(46));
+                            }
                             else if (line.charAt(46)==',')
+                            {
                                 discountId = Integer.parseInt(line.substring(44,46));
-                            else
-                                discountId = Integer.parseInt(line.substring(44,47));
-                            
-                            
-                            thirdPartyId = "883398957725"; //Coupon offer savings is applied across one item
-                            if (isValuemeal){
-                                lastValuemealIndex = transactions.get(transNum-1).valuemealsList.size()-1;
-                                lastProductIndex = transactions.get(transNum-1).valuemealsList.get(lastValuemealIndex).productsList.size()-1;
-                                transactions.get(transNum-1).valuemealsList.get(lastValuemealIndex).productsList.get(lastProductIndex).newDiscount(discountName, discountId, deleteStatus, discountValue, thirdPartyId);
+                                deleteStatus = Character.getNumericValue(line.charAt(47));
                             }
                             else
                             {
-                                lastProductIndex = transactions.get(transNum-1).productsList.size()-1;
-                                transactions.get(transNum-1).productsList.get(lastProductIndex).newDiscount(discountName, discountId, deleteStatus, discountValue, thirdPartyId);
+                                discountId = Integer.parseInt(line.substring(44,47));
+                                deleteStatus = Character.getNumericValue(line.charAt(48));
+                            }
+                            if (isValuemeal){
+                                thirdPartyId = "883398947726"; //Coupon offer savings is applied across multiple items
+                                transactions.get(transNum-1).newDiscount(discountName, discountId, deleteStatus, discountValue, thirdPartyId);
+                            }
+                            else
+                            {
+                                thirdPartyId = "883398957725"; //Coupon offer savings is applied across one item
+                                transactions.get(transNum-1).newDiscount(discountName, discountId, deleteStatus, discountValue, thirdPartyId);
+//                                transactions.get(transNum-1).productsList.get(lastProductIndex).newDiscount(discountName, discountId, deleteStatus, discountValue, thirdPartyId);
                             }
                             break;
                         case "31":
@@ -327,14 +357,7 @@ public class OkrFileReader {
                         case "32":
                             deleteStatus = Character.getNumericValue(line.charAt(45));
                             discountValue = Double.parseDouble(line.substring(25,35).trim());
-                            //Percentage discount below. Used to determine if the order is free or not.
-                            if (line.substring(49,52).equals("100"))
-                            {
-                                thirdPartyId = "92553539";
-                            }
-                            else{
-                                thirdPartyId = "95838532";
-                            }
+                            thirdPartyId = "7710";
                             transactions.get(transNum-1).newDiscount("Employee Discount", 32, deleteStatus, discountValue, thirdPartyId);
                             break;
                         case "33":
@@ -362,7 +385,8 @@ public class OkrFileReader {
                             discountName = line.substring(8,25).trim();
                             thirdPartyId = "61059522"; //Code for a discount applied to "one menu item" I'm assuming this covers various quantities of one "item"
                             lastProductIndex = transactions.get(transNum-1).productsList.size()-1;
-                            transactions.get(transNum-1).productsList.get(lastProductIndex).newDiscount(discountName, 35, deleteStatus, discountValue, thirdPartyId);
+                            transactions.get(transNum-1).newDiscount(discountName, 35, deleteStatus, discountValue, thirdPartyId);
+//                            transactions.get(transNum-1).productsList.get(lastProductIndex).newDiscount(discountName, 35, deleteStatus, discountValue, thirdPartyId);
                             break;
                         case "40":
                             cancelStatus = Integer.parseInt(line.substring(43,44));
@@ -376,7 +400,7 @@ public class OkrFileReader {
                             break;
                         case "42":
 //                          This should have different options for credit card, debit card and 
-//                          other but in the example file these aren't being used
+//                          other but these aren't being used
                             cancelStatus = Integer.parseInt(line.substring(47,48));
                             tenderedAmount = line.substring(24,35).trim();
                             transactions.get(transNum-1).newTender(42, cancelStatus, tenderedAmount);
@@ -387,12 +411,11 @@ public class OkrFileReader {
                             if(!(changeAmount.equals("0.00"))){
                                 changeAmount = "-" + changeAmount;
                                 transactions.get(transNum-1).newTender(45,cancelStatus, changeAmount);
-                                transactions.get(transNum-1).tendersList.get(transactions.get(transNum-1).tendersList.size()-1).is_change = "true";
                             }
                             break;
                         case "50":
                             cancelStatus = Integer.parseInt(line.substring(43,44));
-                            orderSubtotal = (double)Math.round(((Double.parseDouble(line.substring(24,35).trim())))*89.65);
+                            orderSubtotal = (double)Math.round(((Double.parseDouble(line.substring(24,35).trim())))*10000/110.35);
                             
                             taxTotal = (double)Math.round(Double.parseDouble(line.substring(24,35).trim())*100) - orderSubtotal;
                             taxTotal = taxTotal/100;
@@ -411,7 +434,7 @@ public class OkrFileReader {
                                     transactions.get(transNum-1).deleted_items = 1;//An order is Either an overring or it has deleted items NOT both
                                     break;
                                 case 2: case 3: case 4: case 5:
-                                    transactions.get(transNum-1).order_sub_total = Double.parseDouble("-" + orderSubtotal) + Double.parseDouble(changeAmount);
+                                    transactions.get(transNum-1).order_sub_total = Double.parseDouble("-" + orderSubtotal);
                                     transactions.get(transNum-1).is_overring = 1;
                                     transactions.get(transNum-1).deleted_items = 0;//An order is Either an overring or it has deleted items NOT both
                                     break;
@@ -447,43 +470,44 @@ public class OkrFileReader {
                 }
                 indexee++;
             }
+            in.close();
+//            System.out.println("Txt file processing completed.\n Beginning JSON file creation");
             long startTime = System.currentTimeMillis();
             StringBuilder jsonStringBuilder = new StringBuilder();
             jsonStringBuilder.append("{");
             jsonStringBuilder.append("\"api_version\":\"2.3\",");
-            jsonStringBuilder.append("\"password\":\"password here\",");
+            jsonStringBuilder.append("\"password\":\"g7*E34Qb4\",");
             jsonStringBuilder.append("\"method\":\"addTlogs\",");
             jsonStringBuilder.append("\"provider\":\"okr\",");
             jsonStringBuilder.append("\"params\":{");
-            jsonStringBuilder.append("\"restaurant_id\":\"7651\",");
+            jsonStringBuilder.append("\"restaurant_id\":\"").append(restaurantNum).append("\",");
             jsonStringBuilder.append("\"tlogs\":[");
             int j = 0;
             for (Transaction transaction : transactions) {
                 if (!transaction.skipTransaction) {
                     if (j > 0) jsonStringBuilder.append(',');
-                    jsonStringBuilder.append(transaction.outputJSON());
+                    jsonStringBuilder.append(transaction.outputJSON(restaurantNum));
                     j++;
                 }
             }
             jsonStringBuilder.append("]" );
             jsonStringBuilder.append("}" );
-            jsonStringBuilder.append("}\n");
+            jsonStringBuilder.append("}");
             String jsonString = jsonStringBuilder.toString();
             long endTime = System.currentTimeMillis();
 
 //            System.out.println("That took " + (endTime - startTime) + " milliseconds");
-//            System.out.print(jsonStringBuilder);
-            in.close();
-            try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-            new FileOutputStream(fileName + ".json"), "utf-8"))) {
+            String outputFileLocation = fileLocation.concat(fileName).concat(".json");
+            try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileLocation), "utf-8"))) {
                 writer.write(jsonString);
+                System.out.println(fileName + " created!");
             }
             catch (IOException e) {
                 System.out.print("File output error");
             }
         } 
         catch (IOException e) {
-            System.out.print("File input error");
+            System.out.print("-File input error.\n\r");
         }
         
     }

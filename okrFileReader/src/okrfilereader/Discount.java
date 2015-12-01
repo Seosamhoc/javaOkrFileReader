@@ -14,6 +14,11 @@ public class Discount {
     int mode;
     
     public String outputJSON(){
+        if(mode==1)
+        {
+            count = count *-1;
+            amount = amount *-1;
+        }
         StringBuilder jsonStringBuilder = new StringBuilder();
         jsonStringBuilder.append("{");
         jsonStringBuilder.append("\"discount_id\":\"").append(discount_id).append("\",");

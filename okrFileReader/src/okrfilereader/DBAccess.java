@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package okrfilereader;
 
 import java.sql.*;
@@ -15,25 +10,24 @@ public static void main(String[] args) throws ClassNotFoundException
 {
   DBAccess testDB;
   testDB = new DBAccess();
-  String output = testDB.DBAccess("menu/package", 100, "products", true);
+  String output = testDB.DBAccess("menu/package", 100, "products", "10079", true);
   System.out.println(output);
 }
     
-public String DBAccess(String type, int menuNo, String returnColumn){
+public String DBAccess(String type, int menuNo, String returnColumn, String restaurantNum){
     Connection prodDBconn = null;
     String returnValue = "";
     try {
       Class.forName("org.sqlite.JDBC");
-      prodDBconn = DriverManager.getConnection("jdbc:sqlite:ProductDatabase.db");
+      prodDBconn = DriverManager.getConnection("jdbc:sqlite:".concat(restaurantNum).concat("/ProductDatabase.db"));
     } catch ( Exception e ) {
-      System.err.println( "DBAccess.java: " + e.getClass().getName() + ": " + e.getMessage()  );
+      System.err.println( "DBAccess.java ["+ new Exception().getStackTrace()[0].getLineNumber() +"]: " + e.getClass().getName() + ": " + e.getMessage()  );
       System.exit(0);
     }
     
     String queryText;
     try
     {
-//        prodDBconn = DriverManager.getConnection("jdbc:sqlite:ProductDatabase.db");
         Statement statement = prodDBconn.createStatement();
         statement.setQueryTimeout(30);
         queryText = "SELECT " + returnColumn + " FROM productsOKR WHERE type = '" + type + "' AND menuNo = " + menuNo;
@@ -46,15 +40,8 @@ public String DBAccess(String type, int menuNo, String returnColumn){
     }
     catch(SQLException e)
     {
-      // if the error message is "out of memory", 
-      // it probably means no database file is found
-//      System.err.println("See DBAccess [line 51]");
-//      System.err.println(e.getMessage());
-      DBCreate newDB;
-      newDB = new DBCreate();
       try
         {
-    //        prodDBconn = DriverManager.getConnection("jdbc:sqlite:ProductDatabase.db");
             Statement statement = prodDBconn.createStatement();
             statement.setQueryTimeout(30);
             queryText = "SELECT " + returnColumn + " FROM productsOKR WHERE type = '" + type + "' AND menuNo = " + menuNo;
@@ -67,9 +54,9 @@ public String DBAccess(String type, int menuNo, String returnColumn){
         }
         catch(SQLException err)
         {
-            System.err.println("See DBAccess [line 51]");
+            System.err.println("See DBAccess ["+ new Exception().getStackTrace()[0].getLineNumber() +"]");
             System.err.println(err.getMessage());
-            System.exit(0);
+//            System.exit(0);
         }
     }
     finally
@@ -82,30 +69,30 @@ public String DBAccess(String type, int menuNo, String returnColumn){
       catch(SQLException e)
       {
         // connection close failed.
-        System.err.println("See DBAccess [line 63]");
+        System.err.println("See DBAccess ["+ new Exception().getStackTrace()[0].getLineNumber() +"]");
         System.err.println(e);
         System.exit(0);
       }
     }
     return(returnValue);
 }
-public String DBAccess(String type, int menuNo, String returnColumn, Boolean isValuemeal){
+public String DBAccess(String type, int menuNo, String returnColumn, String restaurantNum, Boolean isValuemeal){
     String returnValue = "";
     int itemMenuNo = -1;
     if(!isValuemeal)
     {
         DBAccess productDB;
         productDB = new DBAccess();
-        returnValue = productDB.DBAccess(type, menuNo, returnColumn);
+        returnValue = productDB.DBAccess(type, menuNo, returnColumn, restaurantNum);
     }
     else
     {
         Connection prodDBconn = null;
         try {
           Class.forName("org.sqlite.JDBC");
-          prodDBconn = DriverManager.getConnection("jdbc:sqlite:ProductDatabase.db");
+          prodDBconn = DriverManager.getConnection("jdbc:sqlite:".concat(restaurantNum).concat("/ProductDatabase.db"));
         } catch ( Exception e ) {
-          System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+          System.err.println( e.getClass().getName() + "["+ new Exception().getStackTrace()[0].getLineNumber() +"]: " + e.getMessage() );
           System.exit(0);
         }
 
@@ -135,7 +122,7 @@ public String DBAccess(String type, int menuNo, String returnColumn, Boolean isV
             productDB = new DBAccess();
             if (itemMenuNo != -1)
             {
-                returnValue = productDB.DBAccess(type, itemMenuNo, returnColumn);
+                returnValue = productDB.DBAccess(type, itemMenuNo, returnColumn, restaurantNum);
             }
             else
             {
@@ -146,7 +133,7 @@ public String DBAccess(String type, int menuNo, String returnColumn, Boolean isV
         {
           // if the error message is "out of memory", 
           // it probably means no database file is found
-          System.err.println("DBAccess.java: " + e.getMessage());
+          System.err.println("DBAccess.java: ["+ new Exception().getStackTrace()[0].getLineNumber() +"] " + e.getMessage());
         }
         finally
         {
@@ -158,10 +145,46 @@ public String DBAccess(String type, int menuNo, String returnColumn, Boolean isV
           catch(SQLException e)
           {
             // connection close failed.
-            System.err.println("DBAccess.java: " + e);
+            System.err.println("DBAccess.java: ["+ new Exception().getStackTrace()[0].getLineNumber() +"] " + e);
           }
         }
     }
     return(returnValue);   
+}
+public String UpdatePrice(int productId, int filePrice, String restaurantNum){
+    Connection prodDBconn = null;
+    int updates;
+    try {
+        Class.forName("org.sqlite.JDBC");
+        prodDBconn = DriverManager.getConnection("jdbc:sqlite:".concat(restaurantNum).concat("/ProductDatabase.db"));
+        Statement statement = prodDBconn.createStatement();
+        statement.setQueryTimeout(30);
+        String queryText = "UPDATE productsOKR SET price =" + filePrice + ", lastUpdated = date('now') WHERE type = 'menu/package' AND menuNo =" + productId;
+        updates = statement.executeUpdate(queryText);
+        return "Sucessful updates: " + updates;
+    } catch ( Exception e ) {
+        System.err.println( "DBAccess.java ["+ new Exception().getStackTrace()[0].getLineNumber() +"]: " + e.getClass().getName() + ": " + e.getMessage()  );
+        System.exit(0);
+    }
+    return "Price failed to update";
+}
+public String addProduct(int productId, int filePrice, String fileProductName, String restaurantNum){
+    fileProductName = fileProductName.replace("'", "''");
+    String queryText = "INSERT INTO productsOKR (type, menuNo, products, price, bkpnNo, lastUpdated) VALUES ('menu/package', " + productId + ", '"+ fileProductName +"', " + filePrice + ", '', date('now'))";
+    Connection prodDBconn = null;
+    int inserts;
+    try{
+        Class.forName("org.sqlite.JDBC");
+        prodDBconn = DriverManager.getConnection("jdbc:sqlite:".concat(restaurantNum).concat("/ProductDatabase.db"));
+        Statement statement = prodDBconn.createStatement();
+        statement.setQueryTimeout(30);
+        inserts = statement.executeUpdate(queryText);
+        return "Successful inserts: " + inserts;
+    }
+    catch ( Exception e ) {
+        System.err.println( "DBAccess.java ["+ new Exception().getStackTrace()[0].getLineNumber() +"]: " + e.getClass().getName() + ": " + e.getMessage()  );
+        System.exit(0);
+    }
+    return "failed to add product";
 }
 }

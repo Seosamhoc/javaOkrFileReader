@@ -16,7 +16,7 @@ public class Qualifier {
     double amount;
     double price;
     double a_la_carte_price;
-    int mode = 0;
+    int mode;
     
     public String outputJSON(){
         StringBuilder jsonStringBuilder = new StringBuilder();
